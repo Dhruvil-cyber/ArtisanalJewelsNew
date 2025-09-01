@@ -1,0 +1,349 @@
+import {
+  users,
+  categories,
+  products,
+  productVariants,
+  cart,
+  orders,
+  reviews,
+  type User,
+  type UpsertUser,
+  type Category,
+  type InsertCategory,
+  type Product,
+  type InsertProduct,
+  type ProductVariant,
+  type InsertVariant,
+  type CartItem,
+  type InsertCartItem,
+  type Order,
+  type InsertOrder,
+  type Review,
+  type InsertReview,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, asc, and, or, ilike, sql } from "drizzle-orm";
+
+export interface IStorage {
+  // User operations (required for Replit Auth)
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  
+  // Category operations
+  getCategories(): Promise<Category[]>;
+  createCategory(category: InsertCategory): Promise<Category>;
+  
+  // Product operations
+  getProducts(filters?: {
+    category?: number;
+    search?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    metal?: string;
+    gemstone?: string;
+    featured?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<Product[]>;
+  getProduct(id: number): Promise<Product | undefined>;
+  getProductByHandle(handle: string): Promise<Product | undefined>;
+  createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
+  deleteProduct(id: number): Promise<void>;
+  
+  // Product variant operations
+  getProductVariants(productId: number): Promise<ProductVariant[]>;
+  createVariant(variant: InsertVariant): Promise<ProductVariant>;
+  updateVariant(id: number, variant: Partial<InsertVariant>): Promise<ProductVariant>;
+  
+  // Cart operations
+  getCartItems(userId?: string, sessionId?: string): Promise<CartItem[]>;
+  addToCart(item: InsertCartItem): Promise<CartItem>;
+  updateCartItem(id: number, quantity: number): Promise<CartItem>;
+  removeFromCart(id: number): Promise<void>;
+  clearCart(userId?: string, sessionId?: string): Promise<void>;
+  
+  // Order operations
+  getOrders(userId?: string): Promise<Order[]>;
+  getOrder(id: number): Promise<Order | undefined>;
+  createOrder(order: InsertOrder): Promise<Order>;
+  updateOrderStatus(id: number, status: string): Promise<Order>;
+  
+  // Review operations
+  getReviews(productId: number): Promise<Review[]>;
+  createReview(review: InsertReview): Promise<Review>;
+  
+  // Wishlist operations
+  addToWishlist(userId: string, productId: number): Promise<void>;
+  removeFromWishlist(userId: string, productId: number): Promise<void>;
+  getWishlist(userId: string): Promise<number[]>;
+}
+
+export class DatabaseStorage implements IStorage {
+  // User operations (required for Replit Auth)
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Category operations
+  async getCategories(): Promise<Category[]> {
+    return await db.select().from(categories).where(eq(categories.isActive, true)).orderBy(asc(categories.sortOrder));
+  }
+
+  async createCategory(category: InsertCategory): Promise<Category> {
+    const [created] = await db.insert(categories).values(category).returning();
+    return created;
+  }
+
+  // Product operations
+  async getProducts(filters: {
+    category?: number;
+    search?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    metal?: string;
+    gemstone?: string;
+    featured?: boolean;
+    limit?: number;
+    offset?: number;
+  } = {}): Promise<Product[]> {
+    const conditions = [eq(products.isActive, true)];
+    
+    if (filters.category) {
+      conditions.push(eq(products.category, filters.category));
+    }
+    
+    if (filters.search) {
+      conditions.push(
+        or(
+          ilike(products.title, `%${filters.search}%`),
+          ilike(products.description, `%${filters.search}%`)
+        )!
+      );
+    }
+    
+    if (filters.minPrice) {
+      conditions.push(sql`${products.basePrice}::numeric >= ${filters.minPrice}`);
+    }
+    
+    if (filters.maxPrice) {
+      conditions.push(sql`${products.basePrice}::numeric <= ${filters.maxPrice}`);
+    }
+    
+    if (filters.metal) {
+      conditions.push(eq(products.metal, filters.metal));
+    }
+    
+    if (filters.gemstone) {
+      conditions.push(eq(products.gemstone, filters.gemstone));
+    }
+    
+    if (filters.featured) {
+      conditions.push(eq(products.isFeatured, true));
+    }
+
+    let query = db.select().from(products)
+      .where(and(...conditions))
+      .orderBy(desc(products.createdAt));
+
+    if (filters.limit) {
+      query = query.limit(filters.limit);
+    }
+    
+    if (filters.offset) {
+      query = query.offset(filters.offset);
+    }
+
+    return await query;
+  }
+
+  async getProduct(id: number): Promise<Product | undefined> {
+    const [product] = await db.select().from(products).where(eq(products.id, id));
+    return product || undefined;
+  }
+
+  async getProductByHandle(handle: string): Promise<Product | undefined> {
+    const [product] = await db.select().from(products).where(eq(products.handle, handle));
+    return product || undefined;
+  }
+
+  async createProduct(product: InsertProduct): Promise<Product> {
+    const [created] = await db.insert(products).values(product).returning();
+    return created;
+  }
+
+  async updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product> {
+    const [updated] = await db
+      .update(products)
+      .set({ ...product, updatedAt: new Date() })
+      .where(eq(products.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteProduct(id: number): Promise<void> {
+    await db.delete(products).where(eq(products.id, id));
+  }
+
+  // Product variant operations
+  async getProductVariants(productId: number): Promise<ProductVariant[]> {
+    return await db.select().from(productVariants).where(eq(productVariants.productId, productId));
+  }
+
+  async createVariant(variant: InsertVariant): Promise<ProductVariant> {
+    const [created] = await db.insert(productVariants).values(variant).returning();
+    return created;
+  }
+
+  async updateVariant(id: number, variant: Partial<InsertVariant>): Promise<ProductVariant> {
+    const [updated] = await db
+      .update(productVariants)
+      .set(variant)
+      .where(eq(productVariants.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Cart operations
+  async getCartItems(userId?: string, sessionId?: string): Promise<CartItem[]> {
+    const conditions = [];
+    if (userId) {
+      conditions.push(eq(cart.userId, userId));
+    }
+    if (sessionId) {
+      conditions.push(eq(cart.sessionId, sessionId));
+    }
+    
+    if (conditions.length === 0) return [];
+    
+    return await db.select().from(cart).where(or(...conditions));
+  }
+
+  async addToCart(item: InsertCartItem): Promise<CartItem> {
+    const [created] = await db.insert(cart).values(item).returning();
+    return created;
+  }
+
+  async updateCartItem(id: number, quantity: number): Promise<CartItem> {
+    const [updated] = await db
+      .update(cart)
+      .set({ quantity, updatedAt: new Date() })
+      .where(eq(cart.id, id))
+      .returning();
+    return updated;
+  }
+
+  async removeFromCart(id: number): Promise<void> {
+    await db.delete(cart).where(eq(cart.id, id));
+  }
+
+  async clearCart(userId?: string, sessionId?: string): Promise<void> {
+    const conditions = [];
+    if (userId) {
+      conditions.push(eq(cart.userId, userId));
+    }
+    if (sessionId) {
+      conditions.push(eq(cart.sessionId, sessionId));
+    }
+    
+    if (conditions.length > 0) {
+      await db.delete(cart).where(or(...conditions));
+    }
+  }
+
+  // Order operations
+  async getOrders(userId?: string): Promise<Order[]> {
+    const query = db.select().from(orders).orderBy(desc(orders.createdAt));
+    
+    if (userId) {
+      return await query.where(eq(orders.userId, userId));
+    }
+    
+    return await query;
+  }
+
+  async getOrder(id: number): Promise<Order | undefined> {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    return order || undefined;
+  }
+
+  async createOrder(order: InsertOrder): Promise<Order> {
+    const [created] = await db.insert(orders).values(order).returning();
+    return created;
+  }
+
+  async updateOrderStatus(id: number, status: string): Promise<Order> {
+    const [updated] = await db
+      .update(orders)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(orders.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Review operations
+  async getReviews(productId: number): Promise<Review[]> {
+    return await db
+      .select()
+      .from(reviews)
+      .where(and(eq(reviews.productId, productId), eq(reviews.isApproved, true)))
+      .orderBy(desc(reviews.createdAt));
+  }
+
+  async createReview(review: InsertReview): Promise<Review> {
+    const [created] = await db.insert(reviews).values(review).returning();
+    return created;
+  }
+
+  // Wishlist operations
+  async addToWishlist(userId: string, productId: number): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+    
+    const currentWishlist = user.wishlist || [];
+    if (!currentWishlist.includes(productId.toString())) {
+      const updatedWishlist = [...currentWishlist, productId.toString()];
+      await db
+        .update(users)
+        .set({ wishlist: updatedWishlist })
+        .where(eq(users.id, userId));
+    }
+  }
+
+  async removeFromWishlist(userId: string, productId: number): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+    
+    const currentWishlist = user.wishlist || [];
+    const updatedWishlist = currentWishlist.filter(id => id !== productId.toString());
+    await db
+      .update(users)
+      .set({ wishlist: updatedWishlist })
+      .where(eq(users.id, userId));
+  }
+
+  async getWishlist(userId: string): Promise<number[]> {
+    const user = await this.getUser(userId);
+    if (!user) return [];
+    
+    return (user.wishlist || []).map(id => parseInt(id));
+  }
+}
+
+export const storage = new DatabaseStorage();

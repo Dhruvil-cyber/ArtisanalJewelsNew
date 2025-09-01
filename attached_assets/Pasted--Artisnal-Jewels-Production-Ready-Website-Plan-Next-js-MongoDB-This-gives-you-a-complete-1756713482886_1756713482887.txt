@@ -1,0 +1,774 @@
+# Artisnal Jewels — Production‑Ready Website Plan (Next.js + MongoDB)
+
+> This gives you a complete, modern jewellery e‑commerce stack using the same frontend approach we used before (Next.js + React + Tailwind + shadcn/ui), with MongoDB on the backend. Copy‑paste ready commands, folder structure, schemas, API routes, and VS Code configuration are included.
+
+---
+
+## 1) Tech Stack (Best‑in‑class, battle‑tested)
+
+**Frontend**
+
+* Next.js 14 (App Router, Server Actions, Route Handlers)
+* TypeScript
+* Tailwind CSS + shadcn/ui (Radix‑powered components)
+* React Hook Form + Zod (forms + validation)
+* Framer Motion (micro‑animations)
+* React Query (server state) — optional since App Router caches well; keep for cart/wishlist UX
+* Next SEO (structured data + meta)
+
+**Backend**
+
+* MongoDB Atlas (cloud) with **Mongoose** ODM
+* Next.js Route Handlers (acts like an API server)
+* Stripe (payments)
+* Cloudinary (image upload/optimization for product photos)
+* NextAuth (Auth.js) with **Credentials (email+password)** and optional **Google** provider
+* Nodemailer/Resend (order emails)
+
+**DevOps & Quality**
+
+* Jest + Testing Library (unit/component tests)
+* Playwright (e2e flows: browse → cart → checkout)
+* ESLint + Prettier (strict)
+* Husky + lint‑staged (pre‑commit quality gate)
+* GitHub Actions CI (lint, typecheck, tests)
+* Docker Compose for local MongoDB (if you don’t want Atlas locally)
+
+**Why this stack?**
+
+* Single repo, easy Vercel deploy, super fast SSR/ISR for SEO‑critical catalog pages.
+* Mongo fits product catalogs (variants, metal options, carat, sizes) and order documents naturally.
+
+---
+
+## 2) Core Features (what a great jewellery site needs)
+
+**Customer‑facing**
+
+* Home (hero, collections, featured, trust badges)
+* Catalog with faceted filters (price, metal, gemstone, carat, size, availability)
+* Product Detail Page (gallery, 360° optional, variant picker, size guide, engraving option)
+* Search (fuzzy text + facets; optional Algolia later)
+* Cart & Mini‑cart (edge‑cached; persistent by user/device)
+* Checkout (Stripe): guest + logged‑in
+* Wishlist & Recently Viewed
+* Reviews & Q\&A (with moderation)
+* Account: orders, addresses, payments, returns
+* Content: About, Craftsmanship, Sizing, Care, Shipping & Returns, Contact
+* Blog/Stories (optional CMS approach included below)
+* SEO: JSON‑LD Product/Offer, sitemap, robots, canonical, Open Graph
+* Performance: image optimization, prefetching, PWA (installable) optional
+
+**Admin**
+
+* Secure Admin dashboard (role‑based): products, variants, inventory, categories, collections, orders, coupons, banners, homepage layout blocks
+* Media library (Cloudinary), drag‑drop ordering
+* Order management: status, refunds, printable invoices/labels
+* Analytics: sales, top products, conversion, inventory low‑stock alerts
+
+---
+
+## 3) Monorepo Layout & Conventions
+
+```
+artisnal-jewels/
+├─ .vscode/
+│  ├─ extensions.json
+│  ├─ settings.json
+│  └─ launch.json
+├─ .env.example
+├─ docker-compose.yml
+├─ package.json
+├─ next.config.mjs
+├─ postcss.config.mjs
+├─ tailwind.config.ts
+├─ tsconfig.json
+├─ prisma/                (optional if you add Prisma later; not required for Mongoose)
+├─ public/
+│  ├─ favicon.ico
+│  └─ og-image.png
+├─ src/
+│  ├─ app/
+│  │  ├─ (storefront)/
+│  │  │  ├─ layout.tsx
+│  │  │  ├─ page.tsx            (home)
+│  │  │  ├─ catalog/
+│  │  │  │  ├─ page.tsx
+│  │  │  │  └─ filters.tsx
+│  │  │  ├─ product/[handle]/page.tsx
+│  │  │  ├─ cart/page.tsx
+│  │  │  ├─ checkout/page.tsx
+│  │  │  ├─ account/
+│  │  │  │  ├─ orders/page.tsx
+│  │  │  │  ├─ addresses/page.tsx
+│  │  │  │  └─ settings/page.tsx
+│  │  │  ├─ wishlist/page.tsx
+│  │  │  └─ api/ (route handlers for public endpoints when needed)
+│  │  ├─ (admin)/admin/
+│  │  │  ├─ layout.tsx
+│  │  │  ├─ page.tsx             (dashboard)
+│  │  │  ├─ products/
+│  │  │  │  ├─ page.tsx
+│  │  │  │  └─ new-edit/[id]/page.tsx
+│  │  │  ├─ orders/page.tsx
+│  │  │  └─ media/page.tsx
+│  │  ├─ api/
+│  │  │  ├─ auth/[...nextauth]/route.ts
+│  │  │  ├─ products/route.ts
+│  │  │  ├─ products/[id]/route.ts
+│  │  │  ├─ categories/route.ts
+│  │  │  ├─ cart/route.ts
+│  │  │  ├─ wishlist/route.ts
+│  │  │  ├─ checkout/route.ts
+│  │  │  ├─ orders/route.ts
+│  │  │  ├─ upload/route.ts
+│  │  │  └─ webhooks/stripe/route.ts
+│  │  └─ sitemap.xml/route.ts
+│  ├─ components/
+│  │  ├─ ui/ (shadcn generated components)
+│  │  ├─ product/
+│  │  ├─ cart/
+│  │  ├─ layout/
+│  │  └─ forms/
+│  ├─ lib/
+│  │  ├─ db.ts               (Mongo connection)
+│  │  ├─ auth.ts             (NextAuth config)
+│  │  ├─ validators.ts
+│  │  ├─ stripe.ts
+│  │  ├─ cloudinary.ts
+│  │  ├─ seo.ts
+│  │  └─ utils.ts
+│  ├─ models/
+│  │  ├─ User.ts
+│  │  ├─ Product.ts
+│  │  ├─ Category.ts
+│  │  ├─ Order.ts
+│  │  ├─ Review.ts
+│  │  └─ Cart.ts
+│  ├─ styles/
+│  │  └─ globals.css
+│  └─ tests/
+│     ├─ unit/
+│     └─ e2e/
+└─ README.md
+```
+
+---
+
+## 4) Quick Start — Commands
+
+```bash
+# 1) Create app
+pnpm create next-app@latest artisnal-jewels --ts --eslint --tailwind --app --src-dir --import-alias "@/*"
+cd artisnal-jewels
+
+# 2) Install deps
+pnpm add mongoose next-auth @auth/mongodb-adapter bcrypt zod react-hook-form @tanstack/react-query framer-motion next-seo
+pnpm add stripe @stripe/stripe-js @stripe/react-stripe-js
+pnpm add cloudinary
+
+# 3) Dev tools
+pnpm add -D eslint-config-next prettier prettier-plugin-tailwindcss husky lint-staged jest @testing-library/react @testing-library/jest-dom ts-jest @types/jest playwright @playwright/test
+
+# 4) Init shadcn/ui
+pnpm dlx shadcn-ui@latest init -d
+# then generate a few components (button, input, card, dialog, dropdown-menu...) as needed
+
+# 5) Git hooks
+pnpm dlx husky init && echo 'pnpm typecheck && pnpm lint' > .husky/pre-commit
+```
+
+---
+
+## 5) Environment Variables — `.env.example`
+
+```
+# Mongo
+MONGODB_URI="mongodb+srv://<user>:<pass>@<cluster>.mongodb.net/artisnal"
+
+# Auth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-strong-secret"
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=""
+CLOUDINARY_API_KEY=""
+CLOUDINARY_API_SECRET=""
+
+# Stripe
+STRIPE_SECRET_KEY=""
+STRIPE_WEBHOOK_SECRET=""
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=""
+
+# Email (Resend or SMTP)
+RESEND_API_KEY=""
+SMTP_HOST=""
+SMTP_USER=""
+SMTP_PASS=""
+```
+
+> Duplicate to `.env.local` during development.
+
+---
+
+## 6) Mongo Connection (`src/lib/db.ts`)
+
+```ts
+import mongoose from "mongoose";
+
+const MONGODB_URI = process.env.MONGODB_URI!;
+
+if (!MONGODB_URI) throw new Error("MONGODB_URI not set");
+
+let cached = (global as any).mongoose as { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null };
+if (!cached) cached = (global as any).mongoose = { conn: null, promise: null };
+
+export async function connectDB() {
+  if (cached.conn) return cached.conn;
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGODB_URI, { dbName: "artisnal" });
+  }
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
+```
+
+---
+
+## 7) Mongoose Schemas (essentials)
+
+**Product (`src/models/Product.ts`)**
+
+```ts
+import { Schema, model, models, Types } from "mongoose";
+
+const PriceSchema = new Schema({
+  currency: { type: String, default: "AUD" },
+  amount: { type: Number, required: true }, // cents
+});
+
+const VariantSchema = new Schema({
+  sku: { type: String, unique: true },
+  metal: { type: String, enum: ["gold", "white-gold", "rose-gold", "platinum", "silver"], required: true },
+  size: { type: String },
+  gemstone: { type: String },
+  carat: { type: Number },
+  stock: { type: Number, default: 0 },
+  price: { type: PriceSchema, required: true },
+});
+
+const ProductSchema = new Schema(
+  {
+    title: { type: String, required: true },
+    handle: { type: String, required: true, unique: true, index: true },
+    description: { type: String },
+    media: [{ publicId: String, url: String, alt: String }],
+    categories: [{ type: Types.ObjectId, ref: "Category" }],
+    tags: [String],
+    variants: [VariantSchema],
+    featured: { type: Boolean, default: false },
+    status: { type: String, enum: ["draft", "active", "archived"], default: "active" },
+  },
+  { timestamps: true }
+);
+
+ProductSchema.index({ title: "text", description: "text", tags: 1 });
+
+export default models.Product || model("Product", ProductSchema);
+```
+
+**Order (`src/models/Order.ts`)**
+
+```ts
+import { Schema, model, models, Types } from "mongoose";
+
+const LineItem = new Schema({
+  productId: { type: Types.ObjectId, ref: "Product", required: true },
+  variantSku: String,
+  title: String,
+  quantity: Number,
+  unitPrice: Number, // cents
+});
+
+const Address = new Schema({
+  name: String,
+  line1: String,
+  line2: String,
+  city: String,
+  state: String,
+  postalCode: String,
+  country: { type: String, default: "AU" },
+  phone: String,
+});
+
+const OrderSchema = new Schema(
+  {
+    userId: { type: Types.ObjectId, ref: "User" },
+    email: String,
+    items: [LineItem],
+    shipping: Address,
+    billing: Address,
+    subtotal: Number,
+    shippingTotal: Number,
+    taxTotal: Number,
+    total: Number,
+    currency: { type: String, default: "AUD" },
+    status: { type: String, enum: ["pending", "paid", "shipped", "completed", "canceled", "refunded"], default: "pending" },
+    stripePaymentIntentId: String,
+  },
+  { timestamps: true }
+);
+
+export default models.Order || model("Order", OrderSchema);
+```
+
+**User (`src/models/User.ts`)**
+
+```ts
+import { Schema, model, models } from "mongoose";
+
+const UserSchema = new Schema(
+  {
+    name: String,
+    email: { type: String, unique: true, index: true },
+    passwordHash: String,
+    role: { type: String, enum: ["customer", "admin"], default: "customer" },
+    wishlist: [{ type: String }], // product handles
+  },
+  { timestamps: true }
+);
+
+export default models.User || model("User", UserSchema);
+```
+
+---
+
+## 8) Auth (NextAuth) — `src/lib/auth.ts`
+
+```ts
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
+import { compare } from "bcrypt";
+import { connectDB } from "@/lib/db";
+import User from "@/models/User";
+
+export const { auth, handlers, signIn, signOut } = NextAuth({
+  providers: [
+    Credentials({
+      name: "Credentials",
+      credentials: { email: {}, password: {} },
+      authorize: async (creds) => {
+        await connectDB();
+        const user = await User.findOne({ email: creds?.email });
+        if (!user || !user.passwordHash) return null;
+        const ok = await compare(String(creds?.password), user.passwordHash);
+        return ok ? { id: String(user._id), email: user.email, name: user.name, role: user.role } : null;
+      },
+    }),
+    Google,
+  ],
+  session: { strategy: "jwt" },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) token.role = (user as any).role || "customer";
+      return token;
+    },
+    async session({ session, token }) {
+      (session.user as any).role = token.role;
+      return session;
+    },
+  },
+});
+```
+
+Add the dynamic route handler: `src/app/api/auth/[...nextauth]/route.ts`
+
+```ts
+export { handlers as GET, handlers as POST } from "@/lib/auth";
+```
+
+---
+
+## 9) Products API (Route Handlers)
+
+`src/app/api/products/route.ts`
+
+```ts
+import { NextResponse } from "next/server";
+import Product from "@/models/Product";
+import { connectDB } from "@/lib/db";
+
+export async function GET(req: Request) {
+  await connectDB();
+  const { searchParams } = new URL(req.url);
+  const q = searchParams.get("q");
+  const filter: any = { status: "active" };
+  if (q) filter.$text = { $search: q };
+  const products = await Product.find(filter).limit(60).lean();
+  return NextResponse.json(products);
+}
+
+export async function POST(req: Request) {
+  await connectDB();
+  const body = await req.json();
+  const created = await Product.create(body);
+  return NextResponse.json(created, { status: 201 });
+}
+```
+
+`src/app/api/products/[id]/route.ts`
+
+```ts
+import { NextResponse } from "next/server";
+import Product from "@/models/Product";
+import { connectDB } from "@/lib/db";
+
+export async function GET(_: Request, { params }: { params: { id: string } }) {
+  await connectDB();
+  const product = await Product.findById(params.id).lean();
+  if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json(product);
+}
+```
+
+> Add auth/role checks for admin POST/PATCH/DELETE.
+
+---
+
+## 10) Checkout (Stripe) — `src/app/api/checkout/route.ts`
+
+```ts
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2024-06-20" });
+
+export async function POST(req: Request) {
+  const { items } = await req.json();
+  const line_items = items.map((it: any) => ({
+    price_data: {
+      currency: "aud",
+      product_data: { name: it.title },
+      unit_amount: it.unitPrice, // cents
+    },
+    quantity: it.quantity,
+  }));
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    line_items,
+    success_url: `${process.env.NEXTAUTH_URL}/checkout?status=success`,
+    cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
+  });
+
+  return NextResponse.json({ url: session.url });
+}
+```
+
+Add webhook at `src/app/api/webhooks/stripe/route.ts` to mark orders paid.
+
+---
+
+## 11) Cloudinary Upload (Admin)
+
+`src/app/api/upload/route.ts`
+
+```ts
+import { NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+export async function POST(req: Request) {
+  const { fileBase64, folder = "artisnal/products" } = await req.json();
+  const res = await cloudinary.uploader.upload(fileBase64, { folder });
+  return NextResponse.json({ publicId: res.public_id, url: res.secure_url });
+}
+```
+
+> For large files use signed upload presets from the browser.
+
+---
+
+## 12) Storefront Pages (skeletons)
+
+**Home (`src/app/(storefront)/page.tsx`)**
+
+```tsx
+export default function HomePage() {
+  return (
+    <main className="space-y-12">
+      <section className="h-[56vh] grid place-items-center bg-gradient-to-b from-white to-gray-50 rounded-3xl">
+        <div className="text-center">
+          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight">Artisnal Jewels</h1>
+          <p className="mt-3 text-gray-600">Handcrafted pieces in precious metals and stones.</p>
+        </div>
+      </section>
+      {/* Add featured collections & products */}
+    </main>
+  );
+}
+```
+
+**Catalog (`src/app/(storefront)/catalog/page.tsx`)**
+
+```tsx
+import { Suspense } from "react";
+import Products from "./products";
+
+export default function CatalogPage() {
+  return (
+    <div className="grid gap-6 md:grid-cols-[280px_1fr]">
+      {/* Filters sidebar */}
+      <aside className="sticky top-24 h-fit p-4 border rounded-2xl">Filters</aside>
+      <Suspense fallback={<div>Loading…</div>}>
+        <Products />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+**Product** page fetches by `handle` and renders gallery + variants + add‑to‑cart.
+
+---
+
+## 13) Styling & UI (Tailwind + shadcn)
+
+* Generate base components: `button`, `input`, `label`, `card`, `sheet`, `dialog`, `dropdown-menu`, `badge`, `separator`, `textarea`, `toast`.
+* Use **Sheet** for mini‑cart, **Dialog** for quick view, **Dropdown** for sort.
+* Create **Price** and **Rating** atoms, **ProductCard** molecule, **ProductGrid** organism.
+
+---
+
+## 14) SEO & Structured Data
+
+Use `next-seo` and add Product/Offer JSON‑LD on PDP:
+
+```tsx
+import { ProductJsonLd, NextSeo } from "next-seo";
+```
+
+Generate sitemap via `src/app/sitemap.xml/route.ts` by reading product handles from Mongo.
+
+---
+
+## 15) Security & Compliance
+
+* Rate‑limit API routes (simple token bucket in Edge Middleware or upstash/ratelimit)
+* Input validation with Zod for all POST/PATCH
+* Sanitize rich text (DOMPurify on admin)
+* Store only last4 & brand from Stripe; never raw card data
+* HTTPS everywhere; environment secrets only in server context
+
+---
+
+## 16) Testing
+
+* **Unit:** product utils, price formatting, cart math
+* **Integration:** route handlers (mocks for Mongo)
+* **E2E:** Playwright flows for AU checkout VAT/GST, variant selection, filters
+
+Run:
+
+```bash
+pnpm test
+pnpm exec playwright test
+```
+
+---
+
+## 17) Deployment
+
+* **Vercel** for app (connect GitHub repo, add env vars)
+* **MongoDB Atlas** free/shared cluster; whitelist Vercel IPs or use VPC peering
+* **Stripe** live keys + webhook (set Vercel function URL)
+* **Cloudinary** for CDN‑backed images
+
+---
+
+## 18) Docker (optional local DB)
+
+`docker-compose.yml`
+
+```yml
+version: "3.9"
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports: ["27017:27017"]
+    volumes: ["mongo_data:/data/db"]
+volumes:
+  mongo_data:
+```
+
+---
+
+## 19) VS Code Setup
+
+`.vscode/extensions.json`
+
+```json
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "csstools.postcss",
+    "formulahendry.auto-rename-tag",
+    "streetsidesoftware.code-spell-checker",
+    "Prisma.prisma",
+    "firsttris.vscode-jest-runner",
+    "ms-playwright.playwright"
+  ]
+}
+```
+
+`.vscode/settings.json`
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": true },
+  "files.eol": "\n",
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "css.customData": [".vscode/tailwind.json"],
+  "tailwindCSS.experimental.classRegex": [["cn\\(([^)]*)\\)"]]
+}
+```
+
+`.vscode/launch.json`
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js dev",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["next", "dev"],
+      "cwd": "${workspaceFolder}",
+      "port": 9229,
+      "console": "integratedTerminal"
+    }
+  ]
+}
+```
+
+**Scripts (`package.json`)**
+
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "e2e": "playwright test",
+    "seed": "tsx scripts/seed.ts"
+  }
+}
+```
+
+---
+
+## 20) Seed Script (sample products)
+
+Create `scripts/seed.ts`:
+
+```ts
+import { connectDB } from "@/lib/db";
+import Product from "@/models/Product";
+
+async function main() {
+  await connectDB();
+  await Product.deleteMany({});
+  await Product.create([
+    {
+      title: "Solitaire Diamond Ring",
+      handle: "solitaire-diamond-ring",
+      description: "Classic solitaire in 18k gold.",
+      tags: ["ring", "diamond", "gold"],
+      variants: [
+        { sku: "RING-SOL-18K-6", metal: "gold", size: "6", price: { amount: 299000 } },
+        { sku: "RING-SOL-18K-7", metal: "gold", size: "7", price: { amount: 299000 } }
+      ],
+      media: []
+    },
+  ]);
+  console.log("Seeded products ✅");
+  process.exit(0);
+}
+main();
+```
+
+Run: `pnpm dlx tsx scripts/seed.ts`
+
+---
+
+## 21) Roadmap Enhancements
+
+* Virtual Try‑On (AR) via WebXR or third‑party SDK
+* Algolia for typo‑tolerant search & merchandising rules
+* CMS for stories/landing pages (Sanity or Contentlayer)
+* Gift messaging & engraving personalization
+* Multi‑currency (Stripe + fx rates) and international shipping rules
+* Back‑in‑stock notifications
+
+---
+
+## 22) How to Run Locally (step‑by‑step)
+
+1. **Clone & install**
+
+   ```bash
+   git clone <your-repo>
+   cd artisnal-jewels
+   pnpm i
+   ```
+2. **Create env** from `.env.example` → `.env.local` (fill Mongo/Stripe/Cloudinary)
+3. **Start DB**: either Docker `docker compose up -d` or use Atlas connection string
+4. **Dev server**
+
+   ```bash
+   pnpm dev
+   ```
+5. **Seed data**
+
+   ```bash
+   pnpm dlx tsx scripts/seed.ts
+   ```
+6. Open `http://localhost:3000`
+
+---
+
+## 23) Deployment Checklist
+
+* ✅ Push to GitHub
+* ✅ Connect to Vercel → Import project
+* ✅ Add Env Vars on Vercel (same keys)
+* ✅ Set Stripe webhook endpoint to `/api/webhooks/stripe`
+* ✅ Add custom domain (e.g., artisnaljewels.com.au)
+* ✅ Enable Image Optimization for Cloudinary
+* ✅ Test checkout in live mode with \$0.50 test product
+
+---
+
+## 24) Admin Access
+
+* Create an admin user directly in Mongo (set `role: "admin"`).
+* Protect `/admin` layout by checking `session.user.role`.
+
+---
+
+### That’s it! You now have the full blueprint + VS Code setup to build **Artisnal Jewels** with a best‑practice stack. When you’re ready, say “generate the repo” and I’ll scaffold the initial files for you here.

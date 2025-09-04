@@ -279,13 +279,10 @@ export default function CheckoutPage() {
   // Calculate total
   const subtotal = cartItems.reduce((sum: number, item: CartItemWithProduct) => {
     const price = parseFloat(item.price || '0');
-    console.log('Item price calculation:', { item, price, quantity: item.quantity, lineTotal: price * item.quantity });
     return sum + (price * item.quantity);
   }, 0);
   const shipping = 25.00; // Fixed shipping for Australia
   const total = subtotal + shipping;
-  
-  console.log('Checkout totals:', { subtotal, shipping, total, cartItems });
 
   useEffect(() => {
     if (authLoading) return;

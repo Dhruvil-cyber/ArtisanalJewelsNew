@@ -268,10 +268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { cartItems, amount, currency = 'aud' } = req.body;
       
-      console.log("Payment intent request:", { cartItems, amount, currency });
-      
       if (!amount || amount <= 0) {
-        console.log("Invalid amount received:", amount);
         return res.status(400).json({ message: "Invalid amount" });
       }
 

@@ -287,7 +287,7 @@ export class DatabaseStorage implements IStorage {
         if (product.length > 0) {
           return {
             ...item,
-            price: product[0].price,
+            price: product[0].basePrice,
             title: product[0].title,
             images: product[0].images
           };

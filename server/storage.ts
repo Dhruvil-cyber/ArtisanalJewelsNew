@@ -88,6 +88,18 @@ export interface IStorage {
   addToWishlist(userId: string, productId: number): Promise<void>;
   removeFromWishlist(userId: string, productId: number): Promise<void>;
   getWishlist(userId: string): Promise<number[]>;
+
+  // Additional Analytics operations for admin dashboard
+  getTotalOrders(): Promise<number>;
+  getTotalRevenue(): Promise<number>;
+  getTotalCustomers(): Promise<number>;
+  getOrdersFromDate(date: Date): Promise<Order[]>;
+  getRevenueFromDate(date: Date): Promise<number>;
+  getRevenueAnalytics(period: string): Promise<any>;
+  getTopSellingProducts(): Promise<any[]>;
+  getLowStockProducts(): Promise<Product[]>;
+  getTotalProducts(): Promise<number>;
+  getCustomerAnalytics(): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -376,6 +388,139 @@ export class DatabaseStorage implements IStorage {
     if (!user) return [];
     
     return (user.wishlist || []).map(id => parseInt(id));
+  }
+
+  // Additional Analytics operations for admin dashboard
+  async getTotalOrders(): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` }).from(orders);
+    return result[0]?.count || 0;
+  }
+
+  async getTotalRevenue(): Promise<number> {
+    const result = await db.select({ 
+      total: sql<number>`coalesce(sum(${orders.total}), 0)` 
+    }).from(orders);
+    return result[0]?.total || 0;
+  }
+
+  async getTotalCustomers(): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` }).from(users);
+    return result[0]?.count || 0;
+  }
+
+  async getOrdersFromDate(date: Date): Promise<Order[]> {
+    return await db
+      .select()
+      .from(orders)
+      .where(sql`${orders.createdAt} >= ${date}`)
+      .orderBy(desc(orders.createdAt));
+  }
+
+  async getRevenueFromDate(date: Date): Promise<number> {
+    const result = await db.select({ 
+      total: sql<number>`coalesce(sum(${orders.total}), 0)` 
+    }).from(orders)
+    .where(sql`${orders.createdAt} >= ${date}`);
+    return result[0]?.total || 0;
+  }
+
+  async getRevenueAnalytics(period: string): Promise<any> {
+    const now = new Date();
+    let days = 7;
+    
+    switch (period) {
+      case "30d": days = 30; break;
+      case "90d": days = 90; break;
+      case "1y": days = 365; break;
+      default: days = 7;
+    }
+
+    const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    
+    // Generate revenue data for each day
+    const revenueData = [];
+    for (let i = 0; i < days; i++) {
+      const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
+      const nextDate = new Date(date.getTime() + 24 * 60 * 60 * 1000);
+      
+      const result = await db.select({ 
+        total: sql<number>`coalesce(sum(${orders.total}), 0)` 
+      }).from(orders)
+      .where(sql`${orders.createdAt} >= ${date} AND ${orders.createdAt} < ${nextDate}`);
+      
+      revenueData.push({
+        date: date.toISOString().split('T')[0],
+        revenue: result[0]?.total || 0
+      });
+    }
+
+    return revenueData;
+  }
+
+  async getTopSellingProducts(): Promise<any[]> {
+    // Mock data for now since we need order items for real calculation
+    return [
+      { id: 1, title: "Diamond Solitaire Ring", sales: 24, revenue: 48000 },
+      { id: 2, title: "Pearl Necklace", sales: 18, revenue: 25200 },
+      { id: 3, title: "Gold Earrings", sales: 15, revenue: 22500 },
+      { id: 4, title: "Tennis Bracelet", sales: 12, revenue: 57000 },
+      { id: 5, title: "Ruby Ring", sales: 8, revenue: 24000 }
+    ];
+  }
+
+  async getLowStockProducts(): Promise<Product[]> {
+    return await db
+      .select()
+      .from(products)
+      .where(sql`${products.stock} <= 5`)
+      .orderBy(asc(products.stock));
+  }
+
+  async getTotalProducts(): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` }).from(products);
+    return result[0]?.count || 0;
+  }
+
+  async getCustomerAnalytics(): Promise<any> {
+    const now = new Date();
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    const totalCustomers = await this.getTotalCustomers();
+    
+    const newCustomersThisMonth = await db.select({ 
+      count: sql<number>`count(*)` 
+    }).from(users)
+    .where(sql`${users.createdAt} >= ${thisMonth}`);
+
+    const newCustomersLastMonth = await db.select({ 
+      count: sql<number>`count(*)` 
+    }).from(users)
+    .where(sql`${users.createdAt} >= ${lastMonth} AND ${users.createdAt} < ${thisMonth}`);
+
+    return {
+      totalCustomers,
+      newCustomersThisMonth: newCustomersThisMonth[0]?.count || 0,
+      newCustomersLastMonth: newCustomersLastMonth[0]?.count || 0,
+      customerGrowth: 12.5 // Mock growth percentage
+    };
+  }
+
+  // Placeholder implementations for existing interface methods
+  async getActivePromotions(): Promise<any[]> {
+    return [];
+  }
+
+  async createPromotion(promotion: any): Promise<any> {
+    return promotion;
+  }
+
+  async getAnalytics(startDate: string, endDate: string): Promise<any[]> {
+    return [];
+  }
+
+  async updateAnalytics(date: string, data: any): Promise<void> {
+    // Placeholder implementation
   }
 }
 

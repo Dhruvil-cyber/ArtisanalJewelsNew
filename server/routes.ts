@@ -431,6 +431,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Analytics API endpoints
+  app.get("/api/admin/analytics/overview", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      // Check if user has admin role
+      const user = await storage.getUser(req.user!.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Get overall metrics
+      const totalOrders = await storage.getTotalOrders();
+      const totalRevenue = await storage.getTotalRevenue();
+      const totalCustomers = await storage.getTotalCustomers();
+      const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+      // Get this month's metrics for comparison
+      const currentMonth = new Date();
+      currentMonth.setDate(1); // First day of current month
+      const monthlyOrders = await storage.getOrdersFromDate(currentMonth);
+      const monthlyRevenue = await storage.getRevenueFromDate(currentMonth);
+
+      res.json({
+        totalOrders,
+        totalRevenue,
+        totalCustomers,
+        avgOrderValue,
+        monthlyOrders: monthlyOrders.length,
+        monthlyRevenue,
+        revenueGrowth: 15.8, // Mock growth percentage
+        orderGrowth: 23.4    // Mock growth percentage
+      });
+    } catch (error) {
+      console.error("Analytics overview error:", error);
+      res.status(500).json({ message: "Failed to fetch analytics overview" });
+    }
+  });
+
+  app.get("/api/admin/analytics/revenue", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      // Check if user has admin role
+      const user = await storage.getUser(req.user!.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { period = "7d" } = req.query as { period: string };
+      
+      // Generate revenue data for the specified period
+      const revenueData = await storage.getRevenueAnalytics(period);
+      
+      res.json(revenueData);
+    } catch (error) {
+      console.error("Revenue analytics error:", error);
+      res.status(500).json({ message: "Failed to fetch revenue analytics" });
+    }
+  });
+
+  app.get("/api/admin/analytics/products", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      // Check if user has admin role
+      const user = await storage.getUser(req.user!.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const topProducts = await storage.getTopSellingProducts();
+      const lowStockProducts = await storage.getLowStockProducts();
+      
+      res.json({
+        topProducts,
+        lowStockProducts,
+        totalProducts: await storage.getTotalProducts()
+      });
+    } catch (error) {
+      console.error("Product analytics error:", error);
+      res.status(500).json({ message: "Failed to fetch product analytics" });
+    }
+  });
+
+  app.get("/api/admin/analytics/customers", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      // Check if user has admin role
+      const user = await storage.getUser(req.user!.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const customerStats = await storage.getCustomerAnalytics();
+      
+      res.json(customerStats);
+    } catch (error) {
+      console.error("Customer analytics error:", error);
+      res.status(500).json({ message: "Failed to fetch customer analytics" });
+    }
+  });
+
   // Seed data endpoint for initial setup
   app.post("/api/seed", async (req, res) => {
     try {

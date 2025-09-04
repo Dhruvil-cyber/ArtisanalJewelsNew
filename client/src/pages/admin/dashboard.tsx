@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/formatters";
-import { Package, Users, DollarSign, TrendingUp, Plus } from "lucide-react";
+import { Package, Users, DollarSign, TrendingUp, Plus, BarChart3 } from "lucide-react";
 import { Link } from "wouter";
 import type { Product, Order } from "@shared/schema";
 
@@ -198,6 +198,12 @@ export default function AdminDashboard() {
                 <Button className="w-full justify-start" variant="outline" data-testid="button-products">
                   <Package size={16} className="mr-2" />
                   Manage Products
+                </Button>
+              </Link>
+              <Link href="/admin/analytics">
+                <Button className="w-full justify-start" variant="outline" data-testid="button-analytics">
+                  <BarChart3 size={16} className="mr-2" />
+                  Analytics Dashboard
                 </Button>
               </Link>
               <Button className="w-full justify-start" variant="outline" data-testid="button-orders">

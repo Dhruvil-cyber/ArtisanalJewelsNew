@@ -14,6 +14,7 @@ import Cart from "@/pages/cart";
 import AccountDashboard from "@/pages/account/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminProducts from "@/pages/admin/products";
+import AdminAnalytics from "@/pages/admin/analytics";
 
 // Simple landing page without the problematic components
 function SimpleLanding() {
@@ -75,6 +76,7 @@ function Router() {
           <Route path="/account" component={AccountDashboard} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/products" component={AdminProducts} />
+          <Route path="/admin/analytics" component={AdminAnalytics} />
         </>
       )}
       <Route component={NotFound} />

@@ -101,6 +101,7 @@ function Router() {
           <Route path="/checkout" component={Checkout} />
           <Route path="/account" component={AccountDashboard} />
           <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/products" component={AdminProducts} />
           <Route path="/admin/analytics" component={AdminAnalytics} />
           <Route path="/about" component={About} />

@@ -30,11 +30,11 @@ export const sessions = pgTable(
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique().notNull(),
-  password: varchar("password"), // For JWT auth
+  password: varchar("password").notNull(), // For JWT auth
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").default("customer"), // customer, admin
+  role: varchar("role").default("customer").notNull(), // customer, admin
   wishlist: text("wishlist").array().default(sql`'{}'`),
   isVerified: boolean("is_verified").default(false),
   lastLoginAt: timestamp("last_login_at"),
@@ -219,6 +219,17 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   createdAt: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  wishlist: true,
+  isVerified: true,
+  lastLoginAt: true,
+}).extend({
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
 // Promotional banners table
 export const promotions = pgTable("promotions", {
   id: serial("id").primaryKey(),
@@ -261,6 +272,7 @@ export const insertAnalyticsSchema = createInsertSchema(analytics).omit({
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Product = typeof products.$inferSelect;

@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Gem } from "lucide-react";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -21,17 +20,25 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
-      const response = await apiRequest("POST", "/api/auth/login", data);
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include", // Include cookies
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Login failed");
+      }
       return response.json();
     },
-    onSuccess: (data) => {
-      localStorage.setItem('token', data.token);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: "Welcome back!",
         description: "You have been successfully logged in.",
       });
-      setLocation("/");
+      window.location.href = "/"; // Full page refresh to update auth state
     },
     onError: (error: any) => {
       toast({
@@ -56,42 +63,50 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-2xl border-amber-200/20">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
-            Artisanal Jewels
-          </CardTitle>
-          <CardDescription className="text-slate-400">
-            Sign in to your account
-          </CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black p-4">
+      <div className="absolute inset-0 luxury-gradient opacity-20"></div>
+      
+      <Card className="w-full max-w-md relative z-10 luxury-card border-primary/20">
+        <CardHeader className="space-y-4 text-center">
+          <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center luxury-border">
+            <Gem className="text-black" size={32} />
+          </div>
+          <div>
+            <CardTitle className="text-2xl font-serif luxury-text">Welcome Back</CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Sign in to your Artisanal Jewels account
+            </CardDescription>
+          </div>
         </CardHeader>
+        
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-300">Email</Label>
+              <Label htmlFor="email" className="luxury-text">Email Address</Label>
               <Input
                 id="email"
                 type="email"
+                placeholder="Enter your email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-400"
-                placeholder="Enter your email"
+                className="luxury-border focus:ring-primary"
                 data-testid="input-email"
+                required
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-slate-300">Password</Label>
+              <Label htmlFor="password" className="luxury-text">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-400 pr-10"
-                  placeholder="Enter your password"
+                  className="luxury-border focus:ring-primary pr-10"
                   data-testid="input-password"
+                  required
                 />
                 <Button
                   type="button"
@@ -102,38 +117,40 @@ export default function Login() {
                   data-testid="button-toggle-password"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-slate-400" />
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
                   ) : (
-                    <Eye className="h-4 w-4 text-slate-400" />
+                    <Eye className="h-4 w-4 text-muted-foreground" />
                   )}
                 </Button>
               </div>
             </div>
-
+            
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-black font-semibold"
+              className="w-full luxury-border bg-primary hover:bg-primary/90 text-black font-semibold"
               disabled={loginMutation.isPending}
               data-testid="button-login"
             >
               {loginMutation.isPending ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-
-          <Separator className="my-6 bg-slate-700" />
-
-          <div className="text-center">
-            <p className="text-slate-400 text-sm">
+          
+          <div className="text-center space-y-4 mt-6">
+            <p className="text-sm text-muted-foreground">
               Don't have an account?{" "}
-              <Button
-                variant="link"
-                className="text-amber-400 hover:text-amber-300 p-0"
+              <button
                 onClick={() => setLocation("/register")}
+                className="gold-accent hover:underline font-semibold"
                 data-testid="link-register"
               >
-                Sign up here
-              </Button>
+                Create account
+              </button>
             </p>
+            
+            <div className="text-xs text-muted-foreground">
+              <p>© 2024 Artisanal Jewels • Melbourne, Australia</p>
+              <p className="mt-1">Since 1985 • +61 451565356</p>
+            </div>
           </div>
         </CardContent>
       </Card>

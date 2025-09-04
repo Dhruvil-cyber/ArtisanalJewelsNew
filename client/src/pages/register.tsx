@@ -25,17 +25,25 @@ export default function Register() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: { firstName: string; lastName: string; email: string; password: string }) => {
-      const response = await apiRequest("POST", "/api/auth/register", data);
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include", // Include cookies
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Registration failed");
+      }
       return response.json();
     },
-    onSuccess: (data) => {
-      localStorage.setItem('token', data.token);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: "Welcome to Artisanal Jewels!",
         description: "Your account has been created successfully.",
       });
-      setLocation("/");
+      window.location.href = "/"; // Full page refresh to update auth state
     },
     onError: (error: any) => {
       toast({

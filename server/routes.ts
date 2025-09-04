@@ -1,22 +1,105 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProductSchema, insertCategorySchema, insertReviewSchema } from "@shared/schema";
+import { generateToken, hashPassword, comparePassword, requireAuth, type AuthenticatedRequest } from "./auth";
+import { insertProductSchema, insertCategorySchema, insertReviewSchema, insertUserSchema } from "@shared/schema";
+import cookieParser from "cookie-parser";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Middleware
+  app.use(cookieParser());
 
   // Auth routes
-  app.get('/api/auth/user', async (req: any, res) => {
+  app.post('/api/auth/register', async (req, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user?.claims?.sub) {
-        return res.status(401).json({ message: "Not authenticated" });
+      const { email, password, firstName, lastName } = insertUserSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists with this email" });
       }
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user || null);
+
+      // Hash password and create user
+      const hashedPassword = await hashPassword(password);
+      const user = await storage.createUser({
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role: 'customer'
+      });
+
+      // Generate JWT token
+      const token = generateToken(user);
+      
+      // Set HTTP-only cookie
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
+
+      res.status(201).json({ 
+        message: "User created successfully", 
+        user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "Registration failed" });
+    }
+  });
+
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Check password
+      const isValidPassword = await comparePassword(password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Generate JWT token
+      const token = generateToken(user);
+      
+      // Set HTTP-only cookie
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
+
+      res.json({ 
+        message: "Login successful", 
+        user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  app.post('/api/auth/logout', (req, res) => {
+    res.clearCookie('authToken');
+    res.json({ message: "Logged out successfully" });
+  });
+
+  app.get('/api/auth/user', requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json({ id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -107,10 +190,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cart routes
-  app.get("/api/cart", async (req: any, res) => {
+  app.get("/api/cart", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.claims?.sub;
-      const sessionId = req.session?.id || req.headers['x-session-id'] as string;
+      const userId = req.user!.id;
+      const sessionId = req.headers['x-session-id'] as string;
       
       const items = await storage.getCartItems(userId, sessionId);
       res.json(items);
@@ -120,10 +203,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/cart", async (req: any, res) => {
+  app.post("/api/cart", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.claims?.sub;
-      const sessionId = req.session?.id || req.headers['x-session-id'] as string;
+      const userId = req.user!.id;
+      const sessionId = req.headers['x-session-id'] as string;
       const { productId, variantId, quantity = 1 } = req.body;
 
       const item = await storage.addToCart({
@@ -166,9 +249,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Wishlist routes (protected)
-  app.get("/api/wishlist", isAuthenticated, async (req: any, res) => {
+  app.get("/api/wishlist", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.user!.id;
       const wishlistIds = await storage.getWishlist(userId);
       
       // Get full product details for wishlist items
@@ -187,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/wishlist", isAuthenticated, async (req: any, res) => {
+  app.post("/api/wishlist", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.user.claims.sub;
       const { productId } = req.body;
@@ -200,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/wishlist/:productId", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/wishlist/:productId", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.user.claims.sub;
       const productId = parseInt(req.params.productId);
@@ -214,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Orders (protected)
-  app.get("/api/orders", isAuthenticated, async (req: any, res) => {
+  app.get("/api/orders", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const userId = req.user.claims.sub;
       const orders = await storage.getOrders(userId);
@@ -230,7 +313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const order = await storage.createOrder(req.body);
       
       // Clear cart after order creation
-      const userId = req.user?.claims?.sub;
+      const userId = req.user!.id;
       const sessionId = req.session?.id || req.headers['x-session-id'] as string;
       await storage.clearCart(userId, sessionId);
       
@@ -253,18 +336,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/products/:id/reviews", isAuthenticated, async (req: any, res) => {
+  app.post("/api/products/:id/reviews", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const productId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.user!.id;
       const { rating, title, comment } = req.body;
 
       const review = await storage.createReview({
         productId,
         userId,
-        customerName: req.user.claims.first_name ? 
-          `${req.user.claims.first_name} ${req.user.claims.last_name || ''}`.trim() :
-          req.user.claims.email?.split('@')[0] || 'Anonymous',
+        customerName: req.user.firstName ? 
+          `${req.user.firstName} ${req.user.lastName || ''}`.trim() :
+          req.user.email?.split('@')[0] || 'Anonymous',
         rating,
         title,
         comment,
@@ -279,7 +362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes (protected)
-  app.get("/api/admin/products", isAuthenticated, async (req: any, res) => {
+  app.get("/api/admin/products", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== "admin") {
@@ -294,7 +377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/products", isAuthenticated, async (req: any, res) => {
+  app.post("/api/admin/products", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== "admin") {
@@ -310,7 +393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/products/:id", isAuthenticated, async (req: any, res) => {
+  app.put("/api/admin/products/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== "admin") {
@@ -326,7 +409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/categories", isAuthenticated, async (req: any, res) => {
+  app.post("/api/admin/categories", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== "admin") {

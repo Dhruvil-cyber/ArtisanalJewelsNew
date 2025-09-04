@@ -4,10 +4,19 @@ import { storage } from "./storage";
 import { generateToken, hashPassword, comparePassword, requireAuth, type AuthenticatedRequest } from "./auth";
 import { insertProductSchema, insertCategorySchema, insertReviewSchema, insertUserSchema } from "@shared/schema";
 import cookieParser from "cookie-parser";
+import Stripe from "stripe";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware
   app.use(cookieParser());
+
+  // Initialize Stripe
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+  }
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2023-10-16",
+  });
 
   // Auth routes
   app.post('/api/auth/register', async (req, res) => {
@@ -251,6 +260,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error removing cart item:", error);
       res.status(500).json({ message: "Failed to remove cart item" });
+    }
+  });
+
+  // Payment routes (Stripe)
+  app.post("/api/create-payment-intent", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { cartItems, amount, currency = 'aud' } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      // Create payment intent with Stripe
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: currency,
+        metadata: {
+          userId: req.user!.id,
+          cartItems: JSON.stringify(cartItems?.slice(0, 10) || []) // Limit metadata size
+        },
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id
+      });
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ message: "Error creating payment intent" });
+    }
+  });
+
+  app.post("/api/confirm-payment", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { paymentIntentId, shippingAddress } = req.body;
+      
+      if (!paymentIntentId) {
+        return res.status(400).json({ message: "Payment intent ID is required" });
+      }
+
+      // Retrieve payment intent from Stripe
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      if (paymentIntent.status !== 'succeeded') {
+        return res.status(400).json({ message: "Payment not completed" });
+      }
+
+      // Get user's cart items
+      const userId = req.user!.id;
+      const sessionId = req.headers['x-session-id'] as string;
+      const cartItems = await storage.getCartItems(userId, sessionId);
+      
+      if (cartItems.length === 0) {
+        return res.status(400).json({ message: "Cart is empty" });
+      }
+
+      // Calculate total from cart items
+      const total = cartItems.reduce((sum, item) => 
+        sum + (parseFloat(item.price) * item.quantity), 0
+      );
+
+      // Create order in database
+      const order = await storage.createOrder({
+        userId,
+        email: req.user!.email,
+        items: cartItems.map(item => ({
+          productId: item.productId,
+          variantId: item.variantId,
+          quantity: item.quantity,
+          price: item.price,
+          title: item.title
+        })),
+        total: total.toFixed(2),
+        currency: paymentIntent.currency.toUpperCase(),
+        status: 'confirmed',
+        shippingAddress,
+        paymentIntentId: paymentIntent.id,
+        paymentStatus: 'paid'
+      });
+
+      // Clear cart after successful order
+      await storage.clearCart(userId, sessionId);
+
+      res.json({ 
+        message: "Payment confirmed and order created",
+        orderId: order.id,
+        order
+      });
+    } catch (error) {
+      console.error("Error confirming payment:", error);
+      res.status(500).json({ message: "Error confirming payment" });
     }
   });
 

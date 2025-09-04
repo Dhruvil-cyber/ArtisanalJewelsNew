@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,7 @@ import type { CartItem as CartItemType } from "@shared/schema";
 
 export default function Cart() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -157,14 +159,10 @@ export default function Cart() {
                       title: "Please log in",
                       description: "You need to be logged in to checkout.",
                     });
-                    window.location.href = "/api/login";
+                    setLocation("/login");
                     return;
                   }
-                  // TODO: Implement checkout flow
-                  toast({
-                    title: "Checkout",
-                    description: "Checkout functionality coming soon!",
-                  });
+                  setLocation("/checkout");
                 }}
               />
             </div>

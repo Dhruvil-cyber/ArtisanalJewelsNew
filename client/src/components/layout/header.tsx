@@ -144,7 +144,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
                         Dashboard
                       </span>
                     </Link>
-                    {user?.role === "admin" && (
+                    {(user as any)?.role === "admin" && (
                       <Link href="/admin">
                         <span className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer">
                           Admin Panel

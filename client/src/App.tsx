@@ -16,6 +16,10 @@ import AccountDashboard from "@/pages/account/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminProducts from "@/pages/admin/products";
 import AdminAnalytics from "@/pages/admin/analytics";
+import About from "@/pages/about";
+import Contact from "@/pages/contact";
+import SizeGuide from "@/pages/size-guide";
+import CareInstructions from "@/pages/care-instructions";
 
 // Simple landing page without the problematic components
 function SimpleLanding() {
@@ -65,6 +69,10 @@ function Router() {
           <Route path="/register" component={Register} />
           <Route path="/catalog" component={Catalog} />
           <Route path="/product/:handle" component={ProductDetail} />
+          <Route path="/about" component={About} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/size-guide" component={SizeGuide} />
+          <Route path="/care-instructions" component={CareInstructions} />
         </>
       ) : (
         <>
@@ -79,6 +87,10 @@ function Router() {
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/products" component={AdminProducts} />
           <Route path="/admin/analytics" component={AdminAnalytics} />
+          <Route path="/about" component={About} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/size-guide" component={SizeGuide} />
+          <Route path="/care-instructions" component={CareInstructions} />
         </>
       )}
       <Route component={NotFound} />

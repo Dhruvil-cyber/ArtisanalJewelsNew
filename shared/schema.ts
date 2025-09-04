@@ -259,6 +259,17 @@ export const analytics = pgTable("analytics", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Newsletter subscriptions table
+export const newsletter = pgTable("newsletter", {
+  id: serial("id").primaryKey(),
+  email: varchar("email").unique().notNull(),
+  firstName: varchar("first_name"),
+  isActive: boolean("is_active").default(true),
+  source: varchar("source").default("website"), // website, admin, etc.
+  subscribedAt: timestamp("subscribed_at").defaultNow(),
+  unsubscribedAt: timestamp("unsubscribed_at"),
+});
+
 export const insertPromotionSchema = createInsertSchema(promotions).omit({
   id: true,
   createdAt: true,
@@ -267,6 +278,12 @@ export const insertPromotionSchema = createInsertSchema(promotions).omit({
 export const insertAnalyticsSchema = createInsertSchema(analytics).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertNewsletterSchema = createInsertSchema(newsletter).omit({
+  id: true,
+  subscribedAt: true,
+  unsubscribedAt: true,
 });
 
 // Types
@@ -289,3 +306,5 @@ export type Promotion = typeof promotions.$inferSelect;
 export type InsertPromotion = z.infer<typeof insertPromotionSchema>;
 export type Analytics = typeof analytics.$inferSelect;
 export type InsertAnalytics = z.infer<typeof insertAnalyticsSchema>;
+export type Newsletter = typeof newsletter.$inferSelect;
+export type InsertNewsletter = z.infer<typeof insertNewsletterSchema>;

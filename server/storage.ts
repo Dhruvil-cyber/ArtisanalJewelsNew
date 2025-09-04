@@ -6,6 +6,7 @@ import {
   cart,
   orders,
   reviews,
+  newsletter,
   type User,
   type UpsertUser,
   type Category,
@@ -20,6 +21,8 @@ import {
   type InsertOrder,
   type Review,
   type InsertReview,
+  type Newsletter,
+  type InsertNewsletter,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc, and, or, ilike, sql } from "drizzle-orm";

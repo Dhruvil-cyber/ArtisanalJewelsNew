@@ -1,18 +1,18 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MobileMenu from "@/components/layout/mobile-menu";
 import ProductGrid from "@/components/product/product-grid";
 import { PromoBanner } from "@/components/PromoBanner";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, Shield, Truck, RotateCcw, Star, Check } from "lucide-react";
 import type { Product } from "@shared/schema";
 
 export default function Landing() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [email, setEmail] = useState("");
 
   // Fetch featured products
   const { data: featuredProducts = [], isLoading } = useQuery<Product[]>({
@@ -20,11 +20,6 @@ export default function Landing() {
     queryFn: () => fetch("/api/products?featured=true&limit=4").then(res => res.json()),
   });
 
-  const handleNewsletterSignup = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement newsletter signup
-    console.log("Newsletter signup:", email);
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,19 +57,23 @@ export default function Landing() {
                 Discover our collection of timeless pieces, each meticulously crafted by master artisans using the finest materials and techniques passed down through generations in the heart of Melbourne.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  className="luxury-border bg-primary hover:bg-primary/90 text-black px-8 py-4 font-semibold transition-all duration-300 transform hover:scale-105"
-                  data-testid="button-explore-collections"
-                >
-                  Explore Collections
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="border-2 border-white text-white hover:bg-white hover:text-black px-8 py-4 font-semibold transition-all duration-300"
-                  data-testid="button-watch-story"
-                >
-                  Our Craftsmanship Story
-                </Button>
+                <Link href="/catalog">
+                  <Button 
+                    className="luxury-border bg-primary hover:bg-primary/90 text-black px-8 py-4 font-semibold transition-all duration-300 transform hover:scale-105"
+                    data-testid="button-explore-collections"
+                  >
+                    Explore Collections
+                  </Button>
+                </Link>
+                <Link href="/about">
+                  <Button 
+                    variant="outline" 
+                    className="border-2 border-white text-white hover:bg-white hover:text-black px-8 py-4 font-semibold transition-all duration-300"
+                    data-testid="button-watch-story"
+                  >
+                    Our Craftsmanship Story
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -157,12 +156,14 @@ export default function Landing() {
             </div>
             
             <div className="text-center mt-12">
-              <Button 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 font-semibold"
-                data-testid="button-view-all-products"
-              >
-                View All Products
-              </Button>
+              <Link href="/catalog">
+                <Button 
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 font-semibold"
+                  data-testid="button-view-all-products"
+                >
+                  View All Products
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
@@ -194,12 +195,14 @@ export default function Landing() {
             )}
             
             <div className="text-center mt-12">
-              <Button 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 font-semibold"
-                data-testid="button-view-all-products-featured"
-              >
-                View All Products
-              </Button>
+              <Link href="/catalog">
+                <Button 
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 font-semibold"
+                  data-testid="button-view-all-products-featured"
+                >
+                  View All Products
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
@@ -366,29 +369,12 @@ export default function Landing() {
                 Be the first to discover new collections, exclusive offers, and jewelry care tips from our master craftsmen.
               </p>
               
-              <form onSubmit={handleNewsletterSignup} className="max-w-md mx-auto">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Input
-                    type="email"
-                    placeholder="Enter your email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="flex-1 bg-background text-foreground"
-                    data-testid="input-newsletter-email"
-                    required
-                  />
-                  <Button 
-                    type="submit"
-                    className="bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-3 font-semibold whitespace-nowrap"
-                    data-testid="button-newsletter-subscribe"
-                  >
-                    Subscribe
-                  </Button>
-                </div>
+              <div className="max-w-md mx-auto">
+                <NewsletterSignup variant="inline" className="flex-1" />
                 <p className="text-sm text-gray-300 mt-3">
                   By subscribing, you agree to our Privacy Policy. Unsubscribe at any time.
                 </p>
-              </form>
+              </div>
             </div>
           </div>
         </section>

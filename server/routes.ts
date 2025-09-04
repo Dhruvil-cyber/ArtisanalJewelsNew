@@ -630,6 +630,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Newsletter subscription route
+  app.post('/api/newsletter/subscribe', async (req, res) => {
+    try {
+      const { email, firstName, source = "website" } = req.body;
+      
+      if (!email || !email.includes("@")) {
+        return res.status(400).json({ message: "Valid email address is required" });
+      }
+
+      // Check if email already exists
+      const { db } = await import("./db");
+      const { newsletter } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const [existingSubscription] = await db.select().from(newsletter).where(eq(newsletter.email, email));
+      
+      if (existingSubscription) {
+        if (existingSubscription.isActive) {
+          return res.status(400).json({ message: "This email is already subscribed to our newsletter" });
+        } else {
+          // Reactivate subscription
+          await db.update(newsletter)
+            .set({ 
+              isActive: true, 
+              firstName: firstName || existingSubscription.firstName,
+              source,
+              unsubscribedAt: null 
+            })
+            .where(eq(newsletter.id, existingSubscription.id));
+          
+          return res.json({ message: "Newsletter subscription reactivated successfully" });
+        }
+      }
+
+      // Create new subscription
+      await db.insert(newsletter).values({
+        email,
+        firstName: firstName || null,
+        source,
+        isActive: true,
+      });
+
+      res.json({ message: "Successfully subscribed to newsletter" });
+    } catch (error) {
+      console.error("Newsletter subscription error:", error);
+      res.status(500).json({ message: "Failed to subscribe to newsletter" });
+    }
+  });
+
   // Seed data endpoint for initial setup
   app.post("/api/seed", async (req, res) => {
     try {

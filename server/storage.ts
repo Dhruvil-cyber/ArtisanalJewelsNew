@@ -25,9 +25,12 @@ import { db } from "./db";
 import { eq, desc, asc, and, or, ilike, sql } from "drizzle-orm";
 
 export interface IStorage {
-  // User operations (required for Replit Auth)
+  // User operations
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: UpsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUser(id: string, updates: Partial<User>): Promise<User>;
   
   // Category operations
   getCategories(): Promise<Category[]>;
@@ -73,6 +76,14 @@ export interface IStorage {
   getReviews(productId: number): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
   
+  // Promotion operations
+  getActivePromotions(): Promise<any[]>;
+  createPromotion(promotion: any): Promise<any>;
+  
+  // Analytics operations
+  getAnalytics(startDate: string, endDate: string): Promise<any[]>;
+  updateAnalytics(date: string, data: any): Promise<void>;
+  
   // Wishlist operations
   addToWishlist(userId: string, productId: number): Promise<void>;
   removeFromWishlist(userId: string, productId: number): Promise<void>;
@@ -86,17 +97,39 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .returning();
+    return user;
+  }
+
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
       .values(userData)
       .onConflictDoUpdate({
-        target: users.id,
+        target: users.email,
         set: {
           ...userData,
           updatedAt: new Date(),
         },
       })
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, updates: Partial<User>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, id))
       .returning();
     return user;
   }

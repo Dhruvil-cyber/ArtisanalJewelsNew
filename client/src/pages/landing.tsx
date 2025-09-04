@@ -3,6 +3,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MobileMenu from "@/components/layout/mobile-menu";
 import ProductGrid from "@/components/product/product-grid";
+import { PromoBanner } from "@/components/PromoBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
@@ -27,6 +28,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PromoBanner />
       <Header onMobileMenuToggle={() => setIsMobileMenuOpen(true)} />
       <MobileMenu 
         isOpen={isMobileMenuOpen} 
@@ -35,7 +37,7 @@ export default function Landing() {
 
       <main>
         {/* Hero Section */}
-        <section className="relative h-[80vh] min-h-[600px] bg-primary overflow-hidden">
+        <section className="relative h-[80vh] min-h-[600px] luxury-gradient overflow-hidden">
           <div className="hero-pattern absolute inset-0"></div>
           <div 
             className="absolute inset-0 bg-cover bg-center"
@@ -43,30 +45,35 @@ export default function Landing() {
               backgroundImage: "url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080')"
             }}
           >
-            <div className="gradient-overlay absolute inset-0"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent"></div>
           </div>
           
           <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
             <div className="max-w-2xl">
+              <div className="mb-4">
+                <span className="inline-block px-4 py-2 bg-primary/20 border border-primary rounded-full text-primary font-semibold text-sm tracking-wide">
+                  SINCE 1985 • MELBOURNE, AUSTRALIA
+                </span>
+              </div>
               <h1 className="font-serif font-bold text-4xl sm:text-5xl lg:text-6xl text-white mb-6 leading-tight">
-                Exquisite <span className="text-accent">Handcrafted</span> Jewelry
+                Artisanal <span className="gold-accent">Luxury</span> Jewelry
               </h1>
               <p className="text-xl text-gray-200 mb-8 leading-relaxed">
-                Discover our collection of timeless pieces, each meticulously crafted by master artisans using the finest materials and techniques passed down through generations.
+                Discover our collection of timeless pieces, each meticulously crafted by master artisans using the finest materials and techniques passed down through generations in the heart of Melbourne.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground px-8 py-4 font-semibold transition-all duration-300 transform hover:scale-105"
+                  className="luxury-border bg-primary hover:bg-primary/90 text-black px-8 py-4 font-semibold transition-all duration-300 transform hover:scale-105"
                   data-testid="button-explore-collections"
                 >
                   Explore Collections
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-4 font-semibold transition-all duration-300"
+                  className="border-2 border-white text-white hover:bg-white hover:text-black px-8 py-4 font-semibold transition-all duration-300"
                   data-testid="button-watch-story"
                 >
-                  Watch Our Story
+                  Our Craftsmanship Story
                 </Button>
               </div>
             </div>

@@ -4,64 +4,74 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(60, 9%, 98%);
-  --foreground: hsl(213, 27%, 18%);
-  --card: hsl(60, 9%, 98%);
-  --card-foreground: hsl(213, 27%, 18%);
-  --popover: hsl(60, 9%, 98%);
-  --popover-foreground: hsl(213, 27%, 18%);
-  --primary: hsl(213, 83%, 26%);
-  --primary-foreground: hsl(60, 9%, 98%);
-  --secondary: hsl(213, 27%, 84%);
-  --secondary-foreground: hsl(213, 27%, 18%);
-  --muted: hsl(210, 40%, 96%);
-  --muted-foreground: hsl(215, 16%, 47%);
-  --accent: hsl(25, 95%, 53%);
-  --accent-foreground: hsl(60, 9%, 98%);
+  /* Black + Gold + White Luxury Theme */
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(0, 0%, 0%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(0, 0%, 0%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 0%);
+  --primary: hsl(45, 100%, 50%); /* Gold */
+  --primary-foreground: hsl(0, 0%, 0%);
+  --secondary: hsl(0, 0%, 96%);
+  --secondary-foreground: hsl(0, 0%, 9%);
+  --muted: hsl(0, 0%, 96%);
+  --muted-foreground: hsl(0, 0%, 45%);
+  --accent: hsl(45, 100%, 50%); /* Gold */
+  --accent-foreground: hsl(0, 0%, 0%);
   --destructive: hsl(0, 84%, 60%);
-  --destructive-foreground: hsl(60, 9%, 98%);
-  --border: hsl(214, 32%, 91%);
-  --input: hsl(214, 32%, 91%);
-  --ring: hsl(213, 83%, 26%);
-  --chart-1: hsl(203, 88%, 53%);
-  --chart-2: hsl(159, 100%, 36%);
-  --chart-3: hsl(42, 92%, 56%);
-  --chart-4: hsl(147, 78%, 41%);
-  --chart-5: hsl(341, 75%, 50%);
-  --sidebar: hsl(180, 6%, 97%);
-  --sidebar-foreground: hsl(210, 25%, 7%);
-  --sidebar-primary: hsl(203, 88%, 53%);
-  --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(211, 51%, 92%);
-  --sidebar-accent-foreground: hsl(203, 88%, 53%);
-  --sidebar-border: hsl(205, 25%, 90%);
-  --sidebar-ring: hsl(202, 89%, 53%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(0, 0%, 89%);
+  --input: hsl(0, 0%, 89%);
+  --ring: hsl(45, 100%, 50%); /* Gold */
+  --chart-1: hsl(45, 100%, 50%);
+  --chart-2: hsl(0, 0%, 20%);
+  --chart-3: hsl(43, 74%, 49%);
+  --chart-4: hsl(0, 0%, 60%);
+  --chart-5: hsl(45, 60%, 30%);
+  --sidebar: hsl(0, 0%, 98%);
+  --sidebar-foreground: hsl(0, 0%, 10%);
+  --sidebar-primary: hsl(45, 100%, 50%);
+  --sidebar-primary-foreground: hsl(0, 0%, 0%);
+  --sidebar-accent: hsl(45, 20%, 95%);
+  --sidebar-accent-foreground: hsl(45, 100%, 50%);
+  --sidebar-border: hsl(0, 0%, 92%);
+  --sidebar-ring: hsl(45, 100%, 50%);
   --font-sans: "Inter", system-ui, sans-serif;
   --font-serif: "Playfair Display", serif;
   --font-mono: "Fira Code", monospace;
   --radius: 0.5rem;
+  
+  /* Custom luxury colors */
+  --luxury-black: hsl(0, 0%, 0%);
+  --luxury-gold: hsl(45, 100%, 50%);
+  --luxury-gold-dark: hsl(43, 74%, 49%);
+  --luxury-white: hsl(0, 0%, 100%);
+  --luxury-cream: hsl(45, 25%, 97%);
+  --luxury-charcoal: hsl(0, 0%, 15%);
 }
 
 .dark {
-  --background: hsl(213, 27%, 18%);
-  --foreground: hsl(60, 9%, 98%);
-  --card: hsl(213, 27%, 20%);
-  --card-foreground: hsl(60, 9%, 98%);
-  --popover: hsl(213, 27%, 18%);
-  --popover-foreground: hsl(60, 9%, 98%);
-  --primary: hsl(213, 83%, 40%);
-  --primary-foreground: hsl(60, 9%, 98%);
-  --secondary: hsl(213, 27%, 30%);
-  --secondary-foreground: hsl(60, 9%, 98%);
-  --muted: hsl(213, 27%, 25%);
-  --muted-foreground: hsl(215, 16%, 70%);
-  --accent: hsl(25, 95%, 53%);
-  --accent-foreground: hsl(60, 9%, 98%);
-  --destructive: hsl(0, 84%, 60%);
-  --destructive-foreground: hsl(60, 9%, 98%);
-  --border: hsl(213, 27%, 30%);
-  --input: hsl(213, 27%, 25%);
-  --ring: hsl(213, 83%, 40%);
+  /* Dark Luxury Theme */
+  --background: hsl(0, 0%, 5%);
+  --foreground: hsl(0, 0%, 95%);
+  --card: hsl(0, 0%, 8%);
+  --card-foreground: hsl(0, 0%, 95%);
+  --popover: hsl(0, 0%, 8%);
+  --popover-foreground: hsl(0, 0%, 95%);
+  --primary: hsl(45, 100%, 60%); /* Brighter gold for dark theme */
+  --primary-foreground: hsl(0, 0%, 0%);
+  --secondary: hsl(0, 0%, 12%);
+  --secondary-foreground: hsl(0, 0%, 95%);
+  --muted: hsl(0, 0%, 12%);
+  --muted-foreground: hsl(0, 0%, 60%);
+  --accent: hsl(45, 100%, 60%); /* Brighter gold for dark theme */
+  --accent-foreground: hsl(0, 0%, 0%);
+  --destructive: hsl(0, 62%, 31%);
+  --destructive-foreground: hsl(0, 0%, 95%);
+  --border: hsl(0, 0%, 15%);
+  --input: hsl(0, 0%, 15%);
+  --ring: hsl(45, 100%, 60%); /* Brighter gold for dark theme */
 }
 
 @layer base {
@@ -94,10 +104,41 @@
   }
   
   .price-highlight {
-    background: linear-gradient(135deg, hsl(25, 95%, 53%) 0%, #ea580c 100%);
+    background: linear-gradient(135deg, hsl(45, 100%, 50%) 0%, hsl(43, 74%, 49%) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+  
+  .luxury-gradient {
+    background: linear-gradient(135deg, hsl(0, 0%, 0%) 0%, hsl(0, 0%, 15%) 50%, hsl(45, 100%, 50%) 100%);
+  }
+  
+  .gold-shimmer {
+    background: linear-gradient(90deg, hsl(45, 100%, 50%) 0%, hsl(45, 100%, 60%) 50%, hsl(45, 100%, 50%) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  .luxury-border {
+    border: 1px solid hsl(45, 100%, 50%);
+    box-shadow: 0 0 20px hsla(45, 100%, 50%, 0.3);
+  }
+  
+  .luxury-card {
+    background: linear-gradient(135deg, hsl(0, 0%, 100%) 0%, hsl(45, 25%, 97%) 100%);
+    border: 1px solid hsl(45, 20%, 90%);
+    box-shadow: 0 4px 20px hsla(0, 0%, 0%, 0.1);
+  }
+  
+  .luxury-text {
+    color: hsl(0, 0%, 0%);
+    text-shadow: 0 1px 2px hsla(0, 0%, 0%, 0.1);
+  }
+  
+  .gold-accent {
+    color: hsl(45, 100%, 50%);
+    font-weight: 600;
   }
 
   .loading-shimmer {

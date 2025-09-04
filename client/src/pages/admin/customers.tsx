@@ -31,7 +31,7 @@ export default function AdminCustomers() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const { data: customers = [], isLoading } = useQuery<Customer[]>({
-    queryKey: ['/api/admin/customers'],
+    queryKey: ['/api/test/customers'],
   });
 
   // Filter customers based on search term

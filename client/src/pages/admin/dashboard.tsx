@@ -2,19 +2,27 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { useInventoryMonitoring } from "@/hooks/use-inventory-monitoring";
+import { NotificationCenterButton, InventoryAlert } from "@/components/inventory-alert";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/formatters";
-import { Package, Users, DollarSign, TrendingUp, Plus, BarChart3 } from "lucide-react";
+import { Package, Users, DollarSign, TrendingUp, Plus, BarChart3, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
+import { useState } from "react";
 import type { Product, Order } from "@shared/schema";
 
 export default function AdminDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
+  const { alerts, alertStats, dismissAlert, refreshInventory } = useInventoryMonitoring({
+    enabled: isAuthenticated && user?.role === "admin",
+    pollInterval: 15000 // Check every 15 seconds for admin
+  });
+  const [showNotificationCenter, setShowNotificationCenter] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -89,13 +97,70 @@ export default function AdminDashboard() {
               Manage your jewelry store
             </p>
           </div>
-          <Link href="/admin/products">
-            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground" data-testid="button-manage-products">
-              <Plus size={16} className="mr-2" />
-              Add Product
-            </Button>
-          </Link>
+          <div className="flex items-center gap-4">
+            {/* Inventory Notification Center */}
+            <NotificationCenterButton
+              alertCount={alertStats.total}
+              onClick={() => setShowNotificationCenter(!showNotificationCenter)}
+            />
+            <Link href="/admin/products">
+              <Button className="bg-accent hover:bg-accent/90 text-accent-foreground" data-testid="button-manage-products">
+                <Plus size={16} className="mr-2" />
+                Add Product
+              </Button>
+            </Link>
+          </div>
         </div>
+
+        {/* Inventory Alerts Panel */}
+        {showNotificationCenter && (
+          <Card className="mb-8 border-yellow-200 bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-800">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                Inventory Alerts ({alertStats.total})
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={refreshInventory}
+                  data-testid="button-refresh-inventory"
+                >
+                  Refresh
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowNotificationCenter(false)}
+                  data-testid="button-close-notification-center"
+                >
+                  ×
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {alerts.length === 0 ? (
+                <p className="text-muted-foreground">No inventory alerts at this time.</p>
+              ) : (
+                <div className="space-y-2">
+                  {alerts.map((alert) => (
+                    <InventoryAlert
+                      key={alert.id}
+                      alert={alert}
+                      onDismiss={dismissAlert}
+                      variant="banner"
+                    />
+                  ))}
+                </div>
+              )}
+              <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+                <span>Critical: {alertStats.critical} | Low: {alertStats.low} | Out of Stock: {alertStats.out}</span>
+                <span>Last updated: {new Date().toLocaleTimeString()}</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

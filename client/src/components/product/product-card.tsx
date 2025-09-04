@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { Heart, Star, ShoppingBag } from "lucide-react";
+import { useProductStockStatus } from "@/hooks/use-inventory-monitoring";
+import { InventoryAlert } from "@/components/inventory-alert";
 import type { Product } from "@shared/schema";
 
 interface ProductCardProps {
@@ -21,6 +23,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { stock, status, needsAlert } = useProductStockStatus(product.id);
 
   const addToWishlistMutation = useMutation({
     mutationFn: async (productId: number) => {
@@ -160,11 +163,22 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
           
-          {product.stock === 0 && (
-            <div className="absolute bottom-2 left-2">
-              <Badge variant="secondary" data-testid={`badge-out-of-stock-${product.id}`}>
-                Out of Stock
-              </Badge>
+          {/* Dynamic Inventory Badges */}
+          {needsAlert && (
+            <div className="absolute top-2 left-2">
+              <InventoryAlert
+                alert={{
+                  id: `${product.id}-${status}`,
+                  productId: product.id,
+                  productTitle: product.title,
+                  currentStock: stock,
+                  threshold: status === "critical" ? 3 : 10,
+                  severity: status === "out" ? "out" : status === "critical" ? "critical" : "low",
+                  lastUpdated: new Date()
+                }}
+                variant="badge"
+                showAnimation={true}
+              />
             </div>
           )}
         </div>
@@ -183,9 +197,16 @@ export default function ProductCard({ product }: ProductCardProps) {
         </Link>
         
         <div className="flex items-center justify-between mb-3">
-          <span className="price-highlight font-bold text-lg" data-testid={`text-price-${product.id}`}>
-            {formatPrice(product.basePrice, product.currency || undefined)}
-          </span>
+          <div className="flex flex-col">
+            <span className="price-highlight font-bold text-lg" data-testid={`text-price-${product.id}`}>
+              {formatPrice(product.basePrice, product.currency || undefined)}
+            </span>
+            {needsAlert && (
+              <span className="text-xs text-muted-foreground mt-1">
+                {stock} left in stock
+              </span>
+            )}
+          </div>
           <div className="flex items-center space-x-1">
             <div className="flex text-yellow-400">
               {[...Array(5)].map((_, i) => (

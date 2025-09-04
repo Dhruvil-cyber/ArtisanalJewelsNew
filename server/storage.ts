@@ -277,24 +277,24 @@ export class DatabaseStorage implements IStorage {
     
     if (conditions.length === 0) return [];
     
-    // Join with products table to get pricing information
-    const cartWithProducts = await db
-      .select({
-        id: cart.id,
-        userId: cart.userId,
-        sessionId: cart.sessionId,
-        productId: cart.productId,
-        variantId: cart.variantId,
-        quantity: cart.quantity,
-        createdAt: cart.createdAt,
-        updatedAt: cart.updatedAt,
-        price: products.price,
-        title: products.title,
-        images: products.images
+    // First get cart items
+    const cartItems = await db.select().from(cart).where(or(...conditions));
+    
+    // Then get product details for each cart item
+    const cartWithProducts = await Promise.all(
+      cartItems.map(async (item) => {
+        const product = await db.select().from(products).where(eq(products.id, item.productId)).limit(1);
+        if (product.length > 0) {
+          return {
+            ...item,
+            price: product[0].price,
+            title: product[0].title,
+            images: product[0].images
+          };
+        }
+        return item;
       })
-      .from(cart)
-      .innerJoin(products, eq(cart.productId, products.id))
-      .where(or(...conditions));
+    );
     
     return cartWithProducts as CartItem[];
   }

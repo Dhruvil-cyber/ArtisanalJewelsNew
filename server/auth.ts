@@ -55,7 +55,7 @@ export function authenticateToken(req: AuthenticatedRequest, res: Response, next
   next();
 }
 
-export function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const token = req.cookies?.authToken || req.headers.authorization?.split(' ')[1];
 
   if (!token) {
@@ -67,7 +67,22 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
     return res.status(401).json({ message: 'Invalid or expired token' });
   }
 
-  req.user = decoded;
+  // For now, create a user object from the decoded token
+  // In production, you might want to fetch the full user from database
+  req.user = {
+    id: decoded.id,
+    email: decoded.email,
+    role: decoded.role,
+    firstName: null,
+    lastName: null,
+    password: '',
+    profileImageUrl: null,
+    createdAt: null,
+    updatedAt: null,
+    wishlist: null,
+    isVerified: null,
+    lastLoginAt: null
+  };
   next();
 }
 

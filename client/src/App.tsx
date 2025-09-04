@@ -3,54 +3,49 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
-import NotFound from "@/pages/not-found";
-import Landing from "@/pages/landing";
-import Home from "@/pages/home";
-import Login from "@/pages/login";
-import Register from "@/pages/register";
-import Catalog from "@/pages/catalog";
-import ProductDetail from "@/pages/product-detail";
-import Cart from "@/pages/cart";
-import AccountDashboard from "@/pages/account/dashboard";
-import AdminDashboard from "@/pages/admin/dashboard";
-import AdminProducts from "@/pages/admin/products";
+
+// Simple test component
+function TestLogin() {
+  return (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-yellow-400 mb-4">Artisanal Jewels</h1>
+        <h2 className="text-2xl mb-8">Login Page</h2>
+        <div className="bg-white/10 p-8 rounded-lg">
+          <p className="mb-4">Login form will be here</p>
+          <button className="bg-yellow-400 text-black px-6 py-2 rounded">Test Button</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TestHome() {
+  return (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-yellow-400 mb-4">Artisanal Jewels</h1>
+        <h2 className="text-2xl mb-8">Home Page</h2>
+        <p>React app is working!</p>
+      </div>
+    </div>
+  );
+}
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="loading-shimmer w-32 h-8 rounded bg-muted"></div>
-      </div>
-    );
-  }
-
   return (
     <Switch>
-      {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/login" component={Login} />
-          <Route path="/register" component={Register} />
-          <Route path="/catalog" component={Catalog} />
-          <Route path="/product/:handle" component={ProductDetail} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/login" component={() => { window.location.href = '/'; return null; }} />
-          <Route path="/register" component={() => { window.location.href = '/'; return null; }} />
-          <Route path="/catalog" component={Catalog} />
-          <Route path="/product/:handle" component={ProductDetail} />
-          <Route path="/cart" component={Cart} />
-          <Route path="/account" component={AccountDashboard} />
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/admin/products" component={AdminProducts} />
-        </>
-      )}
-      <Route component={NotFound} />
+      <Route path="/" component={TestHome} />
+      <Route path="/login" component={TestLogin} />
+      <Route>
+        <div className="min-h-screen bg-black text-white flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-yellow-400 mb-4">404</h1>
+            <p>Page not found</p>
+            <a href="/" className="text-yellow-400 underline">Go home</a>
+          </div>
+        </div>
+      </Route>
     </Switch>
   );
 }

@@ -408,7 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Orders (protected)
   app.get("/api/orders", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id;
       const orders = await storage.getOrders(userId);
       res.json(orders);
     } catch (error) {
@@ -801,6 +801,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error seeding database:", error);
       res.status(500).json({ message: "Failed to seed database" });
+    }
+  });
+
+  // Customer Management API Routes (Admin only)
+  app.get("/api/admin/customers", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      // Check if user is admin
+      const user = req.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const customers = await storage.getAllCustomers();
+      
+      // Get stats for each customer
+      const customersWithStats = await Promise.all(
+        customers.map(async (customer) => {
+          const stats = await storage.getCustomerStats(customer.id);
+          return {
+            ...customer,
+            stats
+          };
+        })
+      );
+
+      res.json(customersWithStats);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      res.status(500).json({ message: "Failed to fetch customers" });
+    }
+  });
+
+  app.get("/api/admin/customers/:id/stats", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      // Check if user is admin
+      const user = req.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const customerId = req.params.id;
+      const stats = await storage.getCustomerStats(customerId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching customer stats:", error);
+      res.status(500).json({ message: "Failed to fetch customer stats" });
     }
   });
 

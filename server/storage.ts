@@ -103,6 +103,14 @@ export interface IStorage {
   getLowStockProducts(): Promise<Product[]>;
   getTotalProducts(): Promise<number>;
   getCustomerAnalytics(): Promise<any>;
+  
+  // Customer management operations
+  getAllCustomers(): Promise<User[]>;
+  getCustomerStats(userId: string): Promise<{
+    totalOrders: number;
+    totalSpent: number;
+    lastOrder: Date | null;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -543,6 +551,46 @@ export class DatabaseStorage implements IStorage {
 
   async updateAnalytics(date: string, data: any): Promise<void> {
     // Placeholder implementation
+  }
+
+  // Customer management implementations
+  async getAllCustomers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .orderBy(desc(users.createdAt));
+  }
+
+  async getCustomerStats(userId: string): Promise<{
+    totalOrders: number;
+    totalSpent: number;
+    lastOrder: Date | null;
+  }> {
+    // Get total orders count
+    const orderCountResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(orders)
+      .where(eq(orders.userId, userId));
+    
+    // Get total spent
+    const totalSpentResult = await db
+      .select({ total: sql<number>`COALESCE(sum(${orders.total}), 0)` })
+      .from(orders)
+      .where(eq(orders.userId, userId));
+    
+    // Get last order date
+    const lastOrderResult = await db
+      .select({ createdAt: orders.createdAt })
+      .from(orders)
+      .where(eq(orders.userId, userId))
+      .orderBy(desc(orders.createdAt))
+      .limit(1);
+
+    return {
+      totalOrders: orderCountResult[0]?.count || 0,
+      totalSpent: totalSpentResult[0]?.total || 0,
+      lastOrder: lastOrderResult[0]?.createdAt || null
+    };
   }
 }
 

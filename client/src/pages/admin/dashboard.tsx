@@ -4,13 +4,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { useInventoryMonitoring } from "@/hooks/use-inventory-monitoring";
 import { NotificationCenterButton, InventoryAlert } from "@/components/inventory-alert";
+import { InventoryTracker } from "@/components/inventory-tracker";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/formatters";
-import { Package, Users, DollarSign, TrendingUp, Plus, BarChart3, AlertTriangle } from "lucide-react";
+import { Package, Users, DollarSign, TrendingUp, Plus, BarChart3, AlertTriangle, UserCheck } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 import type { Product, Order } from "@shared/schema";
@@ -275,36 +276,25 @@ export default function AdminDashboard() {
                 <TrendingUp size={16} className="mr-2" />
                 View All Orders
               </Button>
-              <Button className="w-full justify-start" variant="outline" data-testid="button-customers">
-                <Users size={16} className="mr-2" />
-                Customer Management
-              </Button>
+              <Link href="/admin/customers">
+                <Button className="w-full justify-start" variant="outline" data-testid="button-customers">
+                  <UserCheck size={16} className="mr-2" />
+                  Customer Management
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>
 
-        {/* Low Stock Alert */}
-        {products.some(p => p.stock < 5) && (
-          <Card className="mt-8 border-destructive">
-            <CardHeader>
-              <CardTitle className="text-destructive">Low Stock Alert</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {products
-                  .filter(p => p.stock < 5)
-                  .map((product) => (
-                    <div key={product.id} className="flex items-center justify-between">
-                      <span className="text-foreground">{product.title}</span>
-                      <Badge variant="destructive" data-testid={`badge-stock-${product.id}`}>
-                        {product.stock} left
-                      </Badge>
-                    </div>
-                  ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Comprehensive Inventory Tracker */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-6">Inventory Management</h2>
+          <InventoryTracker 
+            showSearch={true}
+            showFilters={true}
+            maxHeight="500px"
+          />
+        </div>
       </main>
 
       <Footer />

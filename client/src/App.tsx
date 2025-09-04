@@ -18,6 +18,7 @@ import AccountDashboard from "@/pages/account/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminProducts from "@/pages/admin/products";
 import AdminAnalytics from "@/pages/admin/analytics";
+import AdminCustomers from "@/pages/admin/customers";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import SizeGuide from "@/pages/size-guide";
@@ -104,6 +105,7 @@ function Router() {
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/products" component={AdminProducts} />
           <Route path="/admin/analytics" component={AdminAnalytics} />
+          <Route path="/admin/customers" component={AdminCustomers} />
           <Route path="/about" component={About} />
           <Route path="/contact" component={Contact} />
           <Route path="/size-guide" component={SizeGuide} />

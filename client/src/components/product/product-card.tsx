@@ -184,7 +184,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         
         <div className="flex items-center justify-between mb-3">
           <span className="price-highlight font-bold text-lg" data-testid={`text-price-${product.id}`}>
-            {formatPrice(product.basePrice, product.currency)}
+            {formatPrice(product.basePrice, product.currency || undefined)}
           </span>
           <div className="flex items-center space-x-1">
             <div className="flex text-yellow-400">

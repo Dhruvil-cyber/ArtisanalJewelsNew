@@ -93,7 +93,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   </Button>
                 </Link>
 
-                {user?.role === "admin" && (
+                {(user as any)?.role === "admin" && (
                   <Link href="/admin">
                     <Button 
                       variant="ghost" 

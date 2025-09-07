@@ -311,14 +311,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addToCart(item: InsertCartItem): Promise<CartItem> {
-    // Check if item already exists in cart
+    // Build conditions to check for existing cart item
     const conditions = [];
+    
+    // For authenticated users, match by userId
+    // For guests, match by sessionId
     if (item.userId) {
       conditions.push(eq(cart.userId, item.userId));
-    }
-    if (item.sessionId) {
+    } else if (item.sessionId) {
       conditions.push(eq(cart.sessionId, item.sessionId));
+      conditions.push(isNull(cart.userId)); // Ensure we don't match user carts
+    } else {
+      // Fallback: create new item if neither userId nor sessionId
+      const [created] = await db.insert(cart).values(item).returning();
+      return created;
     }
+
     conditions.push(eq(cart.productId, item.productId));
     
     // Also check variantId match (both null/undefined or same value)

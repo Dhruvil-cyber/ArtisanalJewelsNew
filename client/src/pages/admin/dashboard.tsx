@@ -20,7 +20,7 @@ export default function AdminDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const { alerts, alertStats, dismissAlert, refreshInventory } = useInventoryMonitoring({
-    enabled: isAuthenticated && user?.role === "admin",
+    enabled: isAuthenticated && (user as any)?.role === "admin",
     pollInterval: 15000 // Check every 15 seconds for admin
   });
   const [showNotificationCenter, setShowNotificationCenter] = useState(false);
@@ -38,7 +38,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    if (!isLoading && user?.role !== "admin") {
+    if (!isLoading && (user as any)?.role !== "admin") {
       toast({
         title: "Access Denied",
         description: "You don't have permission to access the admin dashboard.",
@@ -50,12 +50,12 @@ export default function AdminDashboard() {
 
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["/api/admin/products"],
-    enabled: isAuthenticated && user?.role === "admin",
+    enabled: isAuthenticated && (user as any)?.role === "admin",
   });
 
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
-    enabled: isAuthenticated && user?.role === "admin",
+    enabled: isAuthenticated && (user as any)?.role === "admin",
   });
 
   if (isLoading) {
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
     );
   }
 
-  if (user?.role !== "admin") {
+  if ((user as any)?.role !== "admin") {
     return (
       <div className="min-h-screen bg-background">
         <Header onMobileMenuToggle={() => {}} />
@@ -239,12 +239,12 @@ export default function AdminDashboard() {
                         </p>
                         <p className="text-sm text-muted-foreground">{order.email}</p>
                         <p className="text-sm text-muted-foreground">
-                          {new Date(order.createdAt).toLocaleDateString()}
+                          {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-foreground">
-                          {formatPrice(order.total, order.currency)}
+                          {formatPrice(order.total, order.currency || "USD")}
                         </p>
                         <Badge 
                           variant={order.status === "delivered" ? "default" : "secondary"}

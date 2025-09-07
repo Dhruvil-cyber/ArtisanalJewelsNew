@@ -276,6 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: currency,
+        description: "Artisanal Jewels - Luxury jewelry purchase from Melbourne, Australia",
         metadata: {
           userId: req.user!.id,
           itemCount: cartItems?.length?.toString() || "0"

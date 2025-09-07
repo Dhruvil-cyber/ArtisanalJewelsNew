@@ -9,6 +9,7 @@ import { formatPrice } from "@/lib/formatters";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MobileMenu from "@/components/layout/mobile-menu";
+import RelatedProducts from "@/components/product/related-products";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -397,6 +398,9 @@ export default function ProductDetail() {
             </div>
           </div>
         )}
+
+        {/* Related Products Section */}
+        <RelatedProducts currentProduct={product} />
       </main>
 
       <Footer />

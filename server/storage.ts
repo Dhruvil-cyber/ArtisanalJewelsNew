@@ -224,19 +224,19 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(products.isFeatured, true));
     }
 
-    let query = db.select().from(products)
+    let queryBuilder = db.select().from(products)
       .where(and(...conditions))
       .orderBy(desc(products.createdAt));
 
     if (filters.limit) {
-      query = query.limit(filters.limit);
+      queryBuilder = queryBuilder.limit(filters.limit);
     }
     
     if (filters.offset) {
-      query = query.offset(filters.offset);
+      queryBuilder = queryBuilder.offset(filters.offset);
     }
 
-    return await query;
+    return await queryBuilder;
   }
 
   async getProduct(id: number): Promise<Product | undefined> {
@@ -354,7 +354,9 @@ export class DatabaseStorage implements IStorage {
 
     if (existingItem.length > 0) {
       // Update existing item quantity
-      const newQuantity = existingItem[0].quantity + item.quantity;
+      const currentQuantity = existingItem[0].quantity || 0;
+      const addQuantity = item.quantity || 1;
+      const newQuantity = currentQuantity + addQuantity;
       const [updated] = await db
         .update(cart)
         .set({ 

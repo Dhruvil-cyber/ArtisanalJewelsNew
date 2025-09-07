@@ -219,11 +219,11 @@ export default function ProductDetail() {
             {/* Price */}
             <div className="space-y-2">
               <p className="price-highlight font-bold text-3xl" data-testid="text-product-price">
-                {formatPrice(displayPrice, product.currency)}
+                {formatPrice(displayPrice, product?.currency ?? 'USD')}
               </p>
-              {product.stock > 0 ? (
+              {(product?.stock ?? 0) > 0 ? (
                 <p className="text-sm text-green-600" data-testid="text-product-stock">
-                  In stock ({product.stock} available)
+                  In stock ({product?.stock ?? 0} available)
                 </p>
               ) : (
                 <p className="text-sm text-red-600" data-testid="text-product-out-of-stock">
@@ -249,7 +249,7 @@ export default function ProductDetail() {
                         {variant.metal && `${variant.metal} `}
                         {variant.size && `Size ${variant.size} `}
                         {variant.gemstone && variant.gemstone}
-                        - {formatPrice(variant.price, product.currency)}
+                        - {formatPrice(variant.price, product?.currency ?? 'USD')}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -262,7 +262,7 @@ export default function ProductDetail() {
               <div className="flex space-x-4">
                 <Button
                   onClick={handleAddToCart}
-                  disabled={product.stock === 0 || addToCartMutation.isPending}
+                  disabled={(product?.stock ?? 0) === 0 || addToCartMutation.isPending}
                   className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground"
                   data-testid="button-add-to-cart"
                 >

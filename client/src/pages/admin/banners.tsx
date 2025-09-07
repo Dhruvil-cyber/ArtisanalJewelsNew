@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { Link } from "wouter";
-import Header from "@/components/Header";
+import Header from "@/components/layout/header";
 import { useToast } from "@/hooks/use-toast";
 import type { Banner, InsertBanner } from "@shared/schema";
 

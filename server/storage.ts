@@ -311,6 +311,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addToCart(item: InsertCartItem): Promise<CartItem> {
+    console.log('🛒 Adding to cart:', JSON.stringify(item, null, 2));
+    
     // Build conditions to check for existing cart item
     const conditions = [];
     
@@ -323,6 +325,7 @@ export class DatabaseStorage implements IStorage {
       conditions.push(isNull(cart.userId)); // Ensure we don't match user carts
     } else {
       // Fallback: create new item if neither userId nor sessionId
+      console.log('❌ No userId or sessionId provided, creating new item');
       const [created] = await db.insert(cart).values(item).returning();
       return created;
     }
@@ -336,15 +339,20 @@ export class DatabaseStorage implements IStorage {
       conditions.push(isNull(cart.variantId));
     }
 
+    console.log('🔍 Looking for existing cart item with conditions:', conditions.length);
+
     const existingItem = await db
       .select()
       .from(cart)
       .where(and(...conditions))
       .limit(1);
 
+    console.log('✅ Found existing items:', existingItem.length);
+
     if (existingItem.length > 0) {
       // Update existing item quantity
       const newQuantity = existingItem[0].quantity + item.quantity;
+      console.log(`📈 Updating quantity from ${existingItem[0].quantity} to ${newQuantity}`);
       const [updated] = await db
         .update(cart)
         .set({ 
@@ -356,6 +364,7 @@ export class DatabaseStorage implements IStorage {
       return updated;
     } else {
       // Create new cart item
+      console.log('🆕 Creating new cart item');
       const [created] = await db.insert(cart).values(item).returning();
       return created;
     }

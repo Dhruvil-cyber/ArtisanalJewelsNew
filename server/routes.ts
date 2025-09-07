@@ -357,7 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const total = subtotal + shipping + tax;
 
       // Create order in database
-      const order = await storage.createOrder({
+      const orderData = {
         userId,
         email: req.user!.email,
         items: cartItems.map(item => ({
@@ -376,7 +376,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shippingAddress,
         paymentIntentId: paymentIntent.id,
         paymentStatus: 'paid'
-      });
+      };
+      
+      console.log('🛍️ Creating order with data:', JSON.stringify(orderData, null, 2));
+      const order = await storage.createOrder(orderData);
 
       // Clear cart after successful order
       await storage.clearCart(userId, sessionId);

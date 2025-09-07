@@ -16,23 +16,7 @@ interface CartItemProps {
 }
 
 export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating }: CartItemProps) {
-  const [quantity, setQuantity] = useState(item.quantity);
-
-  // Mock product data since cart item doesn't include full product details
-  const mockProduct = {
-    id: item.productId,
-    title: "Classic Solitaire Diamond Ring",
-    handle: "classic-solitaire-diamond-ring",
-    shortDescription: "1ct Diamond, 14k Gold",
-    basePrice: "3200.00",
-    currency: "USD",
-    images: [
-      {
-        url: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
-        alt: "Classic diamond engagement ring"
-      }
-    ]
-  };
+  const [quantity, setQuantity] = useState(item.quantity || 1);
 
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -54,33 +38,29 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
   };
 
   // Calculate total price for this item
-  const itemTotal = parseFloat(mockProduct.basePrice) * quantity;
+  const itemTotal = parseFloat(item.price || "0") * (quantity || 1);
 
   return (
     <Card className="overflow-hidden" data-testid={`cart-item-${item.id}`}>
       <CardContent className="p-4">
         <div className="flex gap-4">
           {/* Product Image */}
-          <Link href={`/product/${mockProduct.handle}`}>
-            <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0 cursor-pointer">
-              <img
-                src={mockProduct.images[0]?.url}
-                alt={mockProduct.images[0]?.alt || mockProduct.title}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                data-testid={`img-cart-item-${item.id}`}
-              />
-            </div>
-          </Link>
+          <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+            <img
+              src={item.images?.[0]?.url || "/api/placeholder/ring.jpg"}
+              alt={item.images?.[0]?.alt || item.title}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+              data-testid={`img-cart-item-${item.id}`}
+            />
+          </div>
 
           {/* Product Details */}
           <div className="flex-1 min-w-0">
-            <Link href={`/product/${mockProduct.handle}`}>
-              <h3 className="font-medium text-foreground mb-1 hover:text-accent transition-colors cursor-pointer" data-testid={`text-cart-item-title-${item.id}`}>
-                {mockProduct.title}
-              </h3>
-            </Link>
+            <h3 className="font-medium text-foreground mb-1" data-testid={`text-cart-item-title-${item.id}`}>
+              {item.title}
+            </h3>
             <p className="text-sm text-muted-foreground mb-2" data-testid={`text-cart-item-description-${item.id}`}>
-              {mockProduct.shortDescription}
+              {item.shortDescription || "Premium jewelry"}
             </p>
             
             {item.variantId && (
@@ -94,10 +74,10 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
           <div className="flex flex-col items-end justify-between">
             <div className="text-right">
               <p className="text-sm text-muted-foreground">
-                {formatPrice(mockProduct.basePrice, mockProduct.currency)} each
+                {formatPrice(item.price || "0", "USD")} each
               </p>
               <p className="font-semibold text-foreground price-highlight" data-testid={`text-cart-item-total-${item.id}`}>
-                {formatPrice(itemTotal.toFixed(2), mockProduct.currency)}
+                {formatPrice(itemTotal.toFixed(2), "USD")}
               </p>
             </div>
 
@@ -106,8 +86,8 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleQuantityChange(quantity - 1)}
-                disabled={quantity <= 1 || isUpdating}
+                onClick={() => handleQuantityChange((quantity || 1) - 1)}
+                disabled={(quantity || 1) <= 1 || isUpdating}
                 className="w-8 h-8 p-0"
                 data-testid={`button-decrease-quantity-${item.id}`}
               >
@@ -118,7 +98,7 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
                 type="number"
                 min="1"
                 max="10"
-                value={quantity}
+                value={quantity || 1}
                 onChange={handleQuantityInputChange}
                 disabled={isUpdating}
                 className="w-16 text-center"
@@ -128,8 +108,8 @@ export default function CartItem({ item, onUpdateQuantity, onRemove, isUpdating 
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleQuantityChange(quantity + 1)}
-                disabled={quantity >= 10 || isUpdating}
+                onClick={() => handleQuantityChange((quantity || 1) + 1)}
+                disabled={(quantity || 1) >= 10 || isUpdating}
                 className="w-8 h-8 p-0"
                 data-testid={`button-increase-quantity-${item.id}`}
               >

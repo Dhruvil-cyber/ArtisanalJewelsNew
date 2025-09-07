@@ -296,7 +296,13 @@ export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type ProductVariant = typeof productVariants.$inferSelect;
 export type InsertVariant = z.infer<typeof insertVariantSchema>;
-export type CartItem = typeof cart.$inferSelect;
+// Extended cart item with product details (returned by API)
+export type CartItem = typeof cart.$inferSelect & {
+  title?: string;
+  price?: string;
+  images?: Array<{ url: string; alt: string }>;
+  shortDescription?: string;
+};
 export type InsertCartItem = z.infer<typeof insertCartSchema>;
 export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;

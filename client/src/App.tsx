@@ -18,6 +18,7 @@ import Wishlist from "@/pages/wishlist";
 import AccountDashboard from "@/pages/account/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminProducts from "@/pages/admin/products";
+import AdminBanners from "@/pages/admin/banners";
 import AdminAnalytics from "@/pages/admin/analytics";
 import AdminCustomers from "@/pages/admin/customers";
 import About from "@/pages/about";
@@ -106,6 +107,7 @@ function Router() {
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/products" component={AdminProducts} />
+          <Route path="/admin/banners" component={AdminBanners} />
           <Route path="/admin/analytics" component={AdminAnalytics} />
           <Route path="/admin/customers" component={AdminCustomers} />
           <Route path="/about" component={About} />

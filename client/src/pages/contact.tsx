@@ -48,10 +48,20 @@ export default function Contact() {
       
       // Reset form
       form.reset();
-      alert("Thank you for your message! We'll get back to you within 24 hours.");
+      // Use toast instead of alert for better UX
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-4 right-4 bg-primary text-black px-6 py-3 rounded-lg shadow-lg z-50';
+      toast.textContent = "Thank you for your message! We'll get back to you within 24 hours.";
+      document.body.appendChild(toast);
+      setTimeout(() => document.body.removeChild(toast), 3000);
     } catch (error) {
       console.error("Error submitting contact form:", error);
-      alert("Sorry, there was an error sending your message. Please try again or call us directly.");
+      // Use toast instead of alert for better UX
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-4 right-4 bg-destructive text-destructive-foreground px-6 py-3 rounded-lg shadow-lg z-50';
+      toast.textContent = "Sorry, there was an error sending your message. Please try again or call us directly.";
+      document.body.appendChild(toast);
+      setTimeout(() => document.body.removeChild(toast), 3000);
     } finally {
       setIsSubmitting(false);
     }

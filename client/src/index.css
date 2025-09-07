@@ -4,38 +4,38 @@
 @tailwind utilities;
 
 :root {
-  /* Black + Gold + White Luxury Theme */
-  --background: hsl(0, 0%, 100%);
+  /* Swarovski-Inspired Elegant Cream Theme */
+  --background: hsl(45, 15%, 96%); /* Warm cream background like Swarovski */
   --foreground: hsl(0, 0%, 0%);
-  --card: hsl(0, 0%, 100%);
+  --card: hsl(0, 0%, 100%); /* Pure white cards for contrast */
   --card-foreground: hsl(0, 0%, 0%);
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(0, 0%, 0%);
   --primary: hsl(45, 100%, 50%); /* Gold */
   --primary-foreground: hsl(0, 0%, 0%);
-  --secondary: hsl(0, 0%, 96%);
+  --secondary: hsl(45, 10%, 94%); /* Slightly cream tinted secondary */
   --secondary-foreground: hsl(0, 0%, 9%);
-  --muted: hsl(0, 0%, 96%);
+  --muted: hsl(45, 10%, 94%); /* Cream tinted muted */
   --muted-foreground: hsl(0, 0%, 45%);
   --accent: hsl(45, 100%, 50%); /* Gold */
   --accent-foreground: hsl(0, 0%, 0%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(0, 0%, 89%);
-  --input: hsl(0, 0%, 89%);
+  --border: hsl(45, 8%, 87%); /* Warm tinted borders */
+  --input: hsl(45, 8%, 87%); /* Warm tinted inputs */
   --ring: hsl(45, 100%, 50%); /* Gold */
   --chart-1: hsl(45, 100%, 50%);
   --chart-2: hsl(0, 0%, 20%);
   --chart-3: hsl(43, 74%, 49%);
   --chart-4: hsl(0, 0%, 60%);
   --chart-5: hsl(45, 60%, 30%);
-  --sidebar: hsl(0, 0%, 98%);
+  --sidebar: hsl(45, 12%, 98%); /* Cream tinted sidebar */
   --sidebar-foreground: hsl(0, 0%, 10%);
   --sidebar-primary: hsl(45, 100%, 50%);
   --sidebar-primary-foreground: hsl(0, 0%, 0%);
   --sidebar-accent: hsl(45, 20%, 95%);
   --sidebar-accent-foreground: hsl(45, 100%, 50%);
-  --sidebar-border: hsl(0, 0%, 92%);
+  --sidebar-border: hsl(45, 8%, 90%); /* Warm tinted sidebar border */
   --sidebar-ring: hsl(45, 100%, 50%);
   --font-sans: "Inter", system-ui, sans-serif;
   --font-serif: "Playfair Display", serif;
@@ -47,7 +47,8 @@
   --luxury-gold: hsl(45, 100%, 50%);
   --luxury-gold-dark: hsl(43, 74%, 49%);
   --luxury-white: hsl(0, 0%, 100%);
-  --luxury-cream: hsl(45, 25%, 97%);
+  --luxury-cream: hsl(45, 15%, 96%); /* Updated to match background */
+  --luxury-warm-cream: hsl(45, 20%, 94%); /* Slightly warmer cream */
   --luxury-charcoal: hsl(0, 0%, 15%);
 }
 

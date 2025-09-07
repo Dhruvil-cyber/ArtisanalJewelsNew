@@ -110,6 +110,12 @@ export default function AdminDashboard() {
                 Add Product
               </Button>
             </Link>
+            <Link href="/admin/banners">
+              <Button variant="outline" data-testid="button-manage-banners">
+                <Plus size={16} className="mr-2" />
+                Manage Banners
+              </Button>
+            </Link>
           </div>
         </div>
 

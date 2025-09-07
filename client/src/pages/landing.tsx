@@ -9,7 +9,7 @@ import { NewsletterSignup } from "@/components/newsletter-signup";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, Shield, Truck, RotateCcw, Star, Check } from "lucide-react";
-import type { Product } from "@shared/schema";
+import type { Product, Banner } from "@shared/schema";
 
 export default function Landing() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -18,6 +18,12 @@ export default function Landing() {
   const { data: featuredProducts = [], isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products", { featured: true, limit: 4 }],
     queryFn: () => fetch("/api/products?featured=true&limit=4").then(res => res.json()),
+  });
+
+  // Fetch active banners
+  const { data: banners = [] } = useQuery<Banner[]>({
+    queryKey: ["/api/banners"],
+    queryFn: () => fetch("/api/banners").then(res => res.json()),
   });
 
 
@@ -37,7 +43,9 @@ export default function Landing() {
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: "url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080')"
+              backgroundImage: banners.length > 0 && banners[0].images && banners[0].images.length > 0
+                ? `url('${banners[0].images[0].url}')`
+                : "url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080')"
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent"></div>
@@ -51,10 +59,16 @@ export default function Landing() {
                 </span>
               </div>
               <h1 className="font-serif font-bold text-4xl sm:text-5xl lg:text-6xl text-white mb-6 leading-tight">
-                Artisanal <span className="gold-accent">Luxury</span> Jewelry
+                {banners.length > 0 && banners[0].title
+                  ? banners[0].title
+                  : <>Artisanal <span className="gold-accent">Luxury</span> Jewelry</>
+                }
               </h1>
               <p className="text-xl text-gray-200 mb-8 leading-relaxed">
-                Discover our collection of timeless pieces, each meticulously crafted by master artisans using the finest materials and techniques passed down through generations in the heart of Melbourne.
+                {banners.length > 0 && banners[0].description
+                  ? banners[0].description
+                  : "Discover our collection of timeless pieces, each meticulously crafted by master artisans using the finest materials and techniques passed down through generations in the heart of Melbourne."
+                }
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/catalog">

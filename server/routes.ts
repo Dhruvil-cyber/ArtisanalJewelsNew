@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateToken, hashPassword, comparePassword, requireAuth, type AuthenticatedRequest } from "./auth";
-import { insertProductSchema, insertCategorySchema, insertReviewSchema, insertUserSchema } from "@shared/schema";
+import { insertProductSchema, insertCategorySchema, insertReviewSchema, insertUserSchema, insertBannerSchema } from "@shared/schema";
 import cookieParser from "cookie-parser";
 import Stripe from "stripe";
 
@@ -573,6 +573,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating category:", error);
       res.status(500).json({ message: "Failed to create category" });
+    }
+  });
+
+  // Banner admin routes
+  app.get("/api/admin/banners", async (req, res) => {
+    try {
+      const banners = await storage.getBanners();
+      res.json(banners);
+    } catch (error) {
+      console.error("Error fetching banners:", error);
+      res.status(500).json({ message: "Failed to fetch banners" });
+    }
+  });
+
+  app.post("/api/admin/banners", async (req, res) => {
+    try {
+      const validated = insertBannerSchema.parse(req.body);
+      const banner = await storage.createBanner(validated);
+      res.status(201).json(banner);
+    } catch (error) {
+      console.error("Error creating banner:", error);
+      res.status(500).json({ message: "Failed to create banner" });
+    }
+  });
+
+  app.put("/api/admin/banners/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const banner = await storage.updateBanner(id, req.body);
+      res.json(banner);
+    } catch (error) {
+      console.error("Error updating banner:", error);
+      res.status(500).json({ message: "Failed to update banner" });
+    }
+  });
+
+  app.delete("/api/admin/banners/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteBanner(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting banner:", error);
+      res.status(500).json({ message: "Failed to delete banner" });
+    }
+  });
+
+  // Public banner route for frontend
+  app.get("/api/banners", async (req, res) => {
+    try {
+      const banners = await storage.getActiveBanners();
+      res.json(banners);
+    } catch (error) {
+      console.error("Error fetching active banners:", error);
+      res.status(500).json({ message: "Failed to fetch banners" });
     }
   });
 

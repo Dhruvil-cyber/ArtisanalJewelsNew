@@ -43,7 +43,7 @@ export default function Landing() {
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: banners.length > 0 && banners[0].images && banners[0].images.length > 0
+              backgroundImage: banners.length > 0 && banners[0].images && Array.isArray(banners[0].images) && banners[0].images.length > 0
                 ? `url('${banners[0].images[0].url}')`
                 : "url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080')"
             }}

@@ -61,9 +61,9 @@ const BannerForm = ({ banner, onSubmit, isLoading }: BannerFormProps) => {
         <Label htmlFor="images">Banner Images</Label>
         <div className="space-y-4">
           {/* Display existing images */}
-          {formData.images && formData.images.length > 0 && (
+          {formData.images && Array.isArray(formData.images) && formData.images.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {formData.images.map((image, index) => (
+              {(formData.images as any[]).map((image: any, index: number) => (
                 <div key={index} className="relative border rounded-lg p-3">
                   <img
                     src={image.url}
@@ -75,7 +75,7 @@ const BannerForm = ({ banner, onSubmit, isLoading }: BannerFormProps) => {
                       placeholder="Alt text"
                       value={image.alt || ""}
                       onChange={(e) => {
-                        const newImages = [...(formData.images || [])];
+                        const newImages = [...(Array.isArray(formData.images) ? formData.images : [])];
                         newImages[index] = { ...newImages[index], alt: e.target.value };
                         setFormData(prev => ({ ...prev, images: newImages }));
                       }}
@@ -87,7 +87,7 @@ const BannerForm = ({ banner, onSubmit, isLoading }: BannerFormProps) => {
                       variant="destructive"
                       size="sm"
                       onClick={() => {
-                        const newImages = formData.images?.filter((_, i) => i !== index) || [];
+                        const newImages = Array.isArray(formData.images) ? formData.images.filter((_, i) => i !== index) : [];
                         setFormData(prev => ({ ...prev, images: newImages }));
                       }}
                       className="w-full text-xs"
@@ -120,7 +120,7 @@ const BannerForm = ({ banner, onSubmit, isLoading }: BannerFormProps) => {
                         };
                         setFormData(prev => ({
                           ...prev,
-                          images: [...(prev.images || []), newImage]
+                          images: [...(Array.isArray(prev.images) ? prev.images : []), newImage]
                         }));
                       }
                     };
@@ -157,7 +157,7 @@ const BannerForm = ({ banner, onSubmit, isLoading }: BannerFormProps) => {
           <Input
             id="sortOrder"
             type="number"
-            value={formData.sortOrder}
+            value={formData.sortOrder || 0}
             onChange={(e) => setFormData(prev => ({ ...prev, sortOrder: parseInt(e.target.value) || 0 }))}
             data-testid="input-banner-sort-order"
           />
@@ -165,7 +165,7 @@ const BannerForm = ({ banner, onSubmit, isLoading }: BannerFormProps) => {
         <div className="flex items-center space-x-2 mt-6">
           <Switch
             id="isActive"
-            checked={formData.isActive}
+            checked={formData.isActive || false}
             onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
             data-testid="switch-banner-active"
           />
@@ -327,7 +327,7 @@ export default function AdminBanners() {
                         <span className={banner.isActive ? "text-green-600" : "text-red-600"}>
                           {banner.isActive ? "Active" : "Inactive"}
                         </span>
-                        <span>{banner.images?.length || 0} images</span>
+                        <span>{Array.isArray(banner.images) ? banner.images.length : 0} images</span>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -355,9 +355,9 @@ export default function AdminBanners() {
                   </div>
                   
                   {/* Show preview of banner images */}
-                  {banner.images && banner.images.length > 0 && (
+                  {banner.images && Array.isArray(banner.images) && banner.images.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {banner.images.slice(0, 4).map((image, index) => (
+                      {(banner.images as any[]).slice(0, 4).map((image: any, index: number) => (
                         <img
                           key={index}
                           src={image.url}
@@ -365,9 +365,9 @@ export default function AdminBanners() {
                           className="w-full h-20 object-cover rounded"
                         />
                       ))}
-                      {banner.images.length > 4 && (
+                      {Array.isArray(banner.images) && banner.images.length > 4 && (
                         <div className="w-full h-20 bg-muted rounded flex items-center justify-center text-sm text-muted-foreground">
-                          +{banner.images.length - 4} more
+                          +{Array.isArray(banner.images) ? banner.images.length - 4 : 0} more
                         </div>
                       )}
                     </div>

@@ -278,7 +278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: currency,
         metadata: {
           userId: req.user!.id,
-          cartItems: JSON.stringify(cartItems?.slice(0, 10) || []) // Limit metadata size
+          itemCount: cartItems?.length?.toString() || "0"
         },
         automatic_payment_methods: {
           enabled: true,

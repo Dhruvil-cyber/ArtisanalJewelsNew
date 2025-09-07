@@ -12,11 +12,11 @@ interface CartSummaryProps {
 }
 
 export default function CartSummary({ items, onCheckout }: CartSummaryProps) {
-  // Mock pricing calculations since we don't have full product details
+  // Calculate real pricing from cart items
   const subtotal = items.reduce((sum, item) => {
-    // Mock price calculation - in real app, you'd fetch product details
-    const mockPrice = 3200; // Default price per item
-    return sum + (mockPrice * item.quantity);
+    const price = parseFloat(item.price || "0");
+    const quantity = item.quantity || 1;
+    return sum + (price * quantity);
   }, 0);
 
   const shipping = subtotal > 5000 ? 0 : 50; // Free shipping over $5000

@@ -233,55 +233,95 @@ export default function AdminProducts() {
 
         <div>
           <Label htmlFor="images">Product Images</Label>
-          <div className="space-y-3">
-            {formData.images?.map((image, index) => (
-              <div key={index} className="flex gap-2 items-center">
-                <Input
-                  placeholder="Image URL"
-                  value={image.url || ""}
-                  onChange={(e) => {
-                    const newImages = [...(formData.images || [])];
-                    newImages[index] = { ...newImages[index], url: e.target.value };
-                    setFormData(prev => ({ ...prev, images: newImages }));
-                  }}
-                  data-testid={`input-image-url-${index}`}
-                />
-                <Input
-                  placeholder="Alt text"
-                  value={image.alt || ""}
-                  onChange={(e) => {
-                    const newImages = [...(formData.images || [])];
-                    newImages[index] = { ...newImages[index], alt: e.target.value };
-                    setFormData(prev => ({ ...prev, images: newImages }));
-                  }}
-                  className="max-w-xs"
-                  data-testid={`input-image-alt-${index}`}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const newImages = formData.images?.filter((_, i) => i !== index) || [];
-                    setFormData(prev => ({ ...prev, images: newImages }));
-                  }}
-                  data-testid={`button-remove-image-${index}`}
-                >
-                  Remove
-                </Button>
+          <div className="space-y-4">
+            {/* Display existing images */}
+            {formData.images && formData.images.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {formData.images.map((image, index) => (
+                  <div key={index} className="relative border rounded-lg p-2">
+                    <img
+                      src={image.url}
+                      alt={image.alt || `Product image ${index + 1}`}
+                      className="w-full h-32 object-cover rounded"
+                    />
+                    <div className="mt-2 space-y-1">
+                      <Input
+                        placeholder="Alt text"
+                        value={image.alt || ""}
+                        onChange={(e) => {
+                          const newImages = [...(formData.images || [])];
+                          newImages[index] = { ...newImages[index], alt: e.target.value };
+                          setFormData(prev => ({ ...prev, images: newImages }));
+                        }}
+                        className="text-xs"
+                        data-testid={`input-image-alt-${index}`}
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          const newImages = formData.images?.filter((_, i) => i !== index) || [];
+                          setFormData(prev => ({ ...prev, images: newImages }));
+                        }}
+                        className="w-full text-xs"
+                        data-testid={`button-remove-image-${index}`}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                const newImages = [...(formData.images || []), { url: "", alt: "" }];
-                setFormData(prev => ({ ...prev, images: newImages }));
-              }}
-              data-testid="button-add-image"
-            >
-              + Add Image
-            </Button>
+            )}
+            
+            {/* File upload input */}
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (files) {
+                    Array.from(files).forEach((file) => {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        if (event.target?.result) {
+                          const newImage = {
+                            url: event.target.result as string,
+                            alt: file.name.replace(/\.[^/.]+$/, "") // Remove file extension for alt text
+                          };
+                          setFormData(prev => ({
+                            ...prev,
+                            images: [...(prev.images || []), newImage]
+                          }));
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    });
+                  }
+                  // Clear the input
+                  e.target.value = '';
+                }}
+                className="hidden"
+                id="imageUpload"
+                data-testid="input-image-upload"
+              />
+              <label htmlFor="imageUpload" className="cursor-pointer">
+                <div className="space-y-2">
+                  <div className="text-muted-foreground">
+                    📸 Click to upload product images
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Select multiple images at once (JPG, PNG, GIF)
+                  </div>
+                  <Button type="button" variant="outline" className="mt-2">
+                    Choose Images
+                  </Button>
+                </div>
+              </label>
+            </div>
           </div>
         </div>
 

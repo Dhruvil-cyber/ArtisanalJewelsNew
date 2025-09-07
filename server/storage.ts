@@ -25,7 +25,7 @@ import {
   type InsertNewsletter,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, asc, and, or, ilike, sql } from "drizzle-orm";
+import { eq, desc, asc, and, or, ilike, sql, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -311,8 +311,46 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addToCart(item: InsertCartItem): Promise<CartItem> {
-    const [created] = await db.insert(cart).values(item).returning();
-    return created;
+    // Check if item already exists in cart
+    const conditions = [];
+    if (item.userId) {
+      conditions.push(eq(cart.userId, item.userId));
+    }
+    if (item.sessionId) {
+      conditions.push(eq(cart.sessionId, item.sessionId));
+    }
+    conditions.push(eq(cart.productId, item.productId));
+    
+    // Also check variantId match (both null or same value)
+    if (item.variantId) {
+      conditions.push(eq(cart.variantId, item.variantId));
+    } else {
+      conditions.push(isNull(cart.variantId));
+    }
+
+    const existingItem = await db
+      .select()
+      .from(cart)
+      .where(and(...conditions))
+      .limit(1);
+
+    if (existingItem.length > 0) {
+      // Update existing item quantity
+      const newQuantity = existingItem[0].quantity + item.quantity;
+      const [updated] = await db
+        .update(cart)
+        .set({ 
+          quantity: newQuantity, 
+          updatedAt: new Date() 
+        })
+        .where(eq(cart.id, existingItem[0].id))
+        .returning();
+      return updated;
+    } else {
+      // Create new cart item
+      const [created] = await db.insert(cart).values(item).returning();
+      return created;
+    }
   }
 
   async updateCartItem(id: number, quantity: number): Promise<CartItem> {

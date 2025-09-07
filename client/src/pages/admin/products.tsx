@@ -231,6 +231,60 @@ export default function AdminProducts() {
           />
         </div>
 
+        <div>
+          <Label htmlFor="images">Product Images</Label>
+          <div className="space-y-3">
+            {formData.images?.map((image, index) => (
+              <div key={index} className="flex gap-2 items-center">
+                <Input
+                  placeholder="Image URL"
+                  value={image.url || ""}
+                  onChange={(e) => {
+                    const newImages = [...(formData.images || [])];
+                    newImages[index] = { ...newImages[index], url: e.target.value };
+                    setFormData(prev => ({ ...prev, images: newImages }));
+                  }}
+                  data-testid={`input-image-url-${index}`}
+                />
+                <Input
+                  placeholder="Alt text"
+                  value={image.alt || ""}
+                  onChange={(e) => {
+                    const newImages = [...(formData.images || [])];
+                    newImages[index] = { ...newImages[index], alt: e.target.value };
+                    setFormData(prev => ({ ...prev, images: newImages }));
+                  }}
+                  className="max-w-xs"
+                  data-testid={`input-image-alt-${index}`}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const newImages = formData.images?.filter((_, i) => i !== index) || [];
+                    setFormData(prev => ({ ...prev, images: newImages }));
+                  }}
+                  data-testid={`button-remove-image-${index}`}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                const newImages = [...(formData.images || []), { url: "", alt: "" }];
+                setFormData(prev => ({ ...prev, images: newImages }));
+              }}
+              data-testid="button-add-image"
+            >
+              + Add Image
+            </Button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-3 gap-4">
           <div>
             <Label htmlFor="basePrice">Base Price</Label>

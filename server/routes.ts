@@ -348,10 +348,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Cart is empty" });
       }
 
-      // Calculate total from cart items
-      const total = cartItems.reduce((sum, item) => 
-        sum + (parseFloat(item.price) * item.quantity), 0
+      // Calculate pricing breakdown
+      const subtotal = cartItems.reduce((sum, item) => 
+        sum + (parseFloat(item.price || "0") * (item.quantity || 1)), 0
       );
+      const shipping = 25.00; // Fixed shipping for Australia
+      const tax = 0.00; // No tax for now
+      const total = subtotal + shipping + tax;
 
       // Create order in database
       const order = await storage.createOrder({
@@ -364,6 +367,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           price: item.price,
           title: item.title
         })),
+        subtotal: subtotal.toFixed(2),
+        shipping: shipping.toFixed(2), 
+        tax: tax.toFixed(2),
         total: total.toFixed(2),
         currency: paymentIntent.currency.toUpperCase(),
         status: 'confirmed',

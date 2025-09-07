@@ -24,11 +24,11 @@ export default function Catalog() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [filters, setFilters] = useState<ProductFilters>({
     search: "",
-    category: "",
+    category: "all-categories",
     minPrice: "",
     maxPrice: "",
-    metal: "",
-    gemstone: "",
+    metal: "all-metals",
+    gemstone: "all-gemstones",
     sortBy: "newest",
   });
 
@@ -37,11 +37,11 @@ export default function Catalog() {
     queryFn: () => {
       const params = new URLSearchParams();
       if (filters.search) params.set("search", filters.search);
-      if (filters.category) params.set("category", filters.category);
+      if (filters.category && filters.category !== "all-categories") params.set("category", filters.category);
       if (filters.minPrice) params.set("minPrice", filters.minPrice);
       if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
-      if (filters.metal) params.set("metal", filters.metal);
-      if (filters.gemstone) params.set("gemstone", filters.gemstone);
+      if (filters.metal && filters.metal !== "all-metals") params.set("metal", filters.metal);
+      if (filters.gemstone && filters.gemstone !== "all-gemstones") params.set("gemstone", filters.gemstone);
       params.set("limit", "24");
       
       return fetch(`/api/products?${params}`).then(res => res.json());
@@ -130,11 +130,11 @@ export default function Catalog() {
                   variant="outline" 
                   onClick={() => setFilters({
                     search: "",
-                    category: "",
+                    category: "all-categories",
                     minPrice: "",
                     maxPrice: "",
-                    metal: "",
-                    gemstone: "",
+                    metal: "all-metals",
+                    gemstone: "all-gemstones",
                     sortBy: "newest",
                   })}
                   className="mt-4"

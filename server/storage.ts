@@ -311,8 +311,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addToCart(item: InsertCartItem): Promise<CartItem> {
-    console.log('Adding to cart:', JSON.stringify(item, null, 2));
-    
     // Check if item already exists in cart
     const conditions = [];
     if (item.userId) {
@@ -336,12 +334,9 @@ export class DatabaseStorage implements IStorage {
       .where(and(...conditions))
       .limit(1);
 
-    console.log('Existing item found:', existingItem.length > 0 ? existingItem[0] : 'none');
-
     if (existingItem.length > 0) {
       // Update existing item quantity
       const newQuantity = existingItem[0].quantity + item.quantity;
-      console.log(`Updating quantity from ${existingItem[0].quantity} to ${newQuantity}`);
       const [updated] = await db
         .update(cart)
         .set({ 
@@ -353,7 +348,6 @@ export class DatabaseStorage implements IStorage {
       return updated;
     } else {
       // Create new cart item
-      console.log('Creating new cart item');
       const [created] = await db.insert(cart).values(item).returning();
       return created;
     }

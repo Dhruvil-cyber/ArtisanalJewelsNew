@@ -24,20 +24,29 @@ interface ProductFiltersProps {
 
 export default function ProductFilters({ categories, filters, onFilterChange }: ProductFiltersProps) {
   const activeFilters = Object.entries(filters).filter(([key, value]) => 
-    value && key !== "sortBy" && key !== "search"
+    value && key !== "sortBy" && key !== "search" && 
+    value !== "all-categories" && value !== "all-metals" && value !== "all-gemstones"
   );
 
   const clearFilter = (key: string) => {
-    onFilterChange({ [key]: "" });
+    if (key === "category") {
+      onFilterChange({ [key]: "all-categories" });
+    } else if (key === "metal") {
+      onFilterChange({ [key]: "all-metals" });
+    } else if (key === "gemstone") {
+      onFilterChange({ [key]: "all-gemstones" });
+    } else {
+      onFilterChange({ [key]: "" });
+    }
   };
 
   const clearAllFilters = () => {
     onFilterChange({
-      category: "",
+      category: "all-categories",
       minPrice: "",
       maxPrice: "",
-      metal: "",
-      gemstone: "",
+      metal: "all-metals",
+      gemstone: "all-gemstones",
     });
   };
 
@@ -103,7 +112,7 @@ export default function ProductFilters({ categories, filters, onFilterChange }: 
               <SelectValue placeholder="All categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All categories</SelectItem>
+              <SelectItem value="all-categories">All categories</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id.toString()}>
                   {category.name}
@@ -157,7 +166,7 @@ export default function ProductFilters({ categories, filters, onFilterChange }: 
               <SelectValue placeholder="All metals" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All metals</SelectItem>
+              <SelectItem value="all-metals">All metals</SelectItem>
               <SelectItem value="gold">Gold</SelectItem>
               <SelectItem value="white-gold">White Gold</SelectItem>
               <SelectItem value="rose-gold">Rose Gold</SelectItem>
@@ -180,7 +189,7 @@ export default function ProductFilters({ categories, filters, onFilterChange }: 
               <SelectValue placeholder="All gemstones" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All gemstones</SelectItem>
+              <SelectItem value="all-gemstones">All gemstones</SelectItem>
               <SelectItem value="diamond">Diamond</SelectItem>
               <SelectItem value="pearl">Pearl</SelectItem>
               <SelectItem value="ruby">Ruby</SelectItem>

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -111,9 +112,11 @@ export default function AccountDashboard() {
               <div className="text-2xl font-bold" data-testid="text-wishlist-count">{wishlist.length}</div>
               <p className="text-xs text-muted-foreground">Saved items</p>
               {wishlist.length > 0 && (
-                <Button variant="outline" size="sm" className="mt-4" data-testid="button-view-wishlist">
-                  View Wishlist
-                </Button>
+                <Link href="/wishlist">
+                  <Button variant="outline" size="sm" className="mt-4" data-testid="button-view-wishlist">
+                    View Wishlist
+                  </Button>
+                </Link>
               )}
             </CardContent>
           </Card>

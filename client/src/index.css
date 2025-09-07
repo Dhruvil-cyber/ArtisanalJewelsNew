@@ -90,30 +90,7 @@
     background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(30, 41, 59, 0.4) 100%);
   }
   
-  .hero-pattern {
-    background-image: radial-gradient(circle at 25px 25px, rgba(217, 119, 6, 0.1) 2%, transparent 0%);
-    background-size: 50px 50px;
-  }
-  
-  .card-hover {
-    transition: all 0.3s ease;
-  }
-  
-  .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
-  
-  .price-highlight {
-    background: linear-gradient(135deg, hsl(45, 100%, 50%) 0%, hsl(43, 74%, 49%) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  .luxury-gradient {
-    background: linear-gradient(135deg, hsl(0, 0%, 0%) 0%, hsl(0, 0%, 15%) 50%, hsl(45, 100%, 50%) 100%);
-  }
+  /* Remove duplicates - moved to bottom of file */
   
   .gold-shimmer {
     background: linear-gradient(90deg, hsl(45, 100%, 50%) 0%, hsl(45, 100%, 60%) 50%, hsl(45, 100%, 50%) 100%);
@@ -146,6 +123,34 @@
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
+  }
+
+  .luxury-gradient {
+    background: linear-gradient(135deg, 
+      hsl(0, 0%, 5%) 0%, 
+      hsl(25, 15%, 15%) 25%, 
+      hsl(25, 25%, 25%) 50%, 
+      hsl(25, 35%, 35%) 75%, 
+      hsl(45, 45%, 45%) 100%);
+  }
+
+  .hero-pattern {
+    background-image: radial-gradient(circle at 25% 25%, hsla(45, 100%, 50%, 0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 75% 75%, hsla(25, 100%, 60%, 0.1) 0%, transparent 50%);
+  }
+
+  .price-highlight {
+    color: hsl(25, 45%, 65%);
+    font-weight: 700;
+  }
+
+  .card-hover {
+    transition: all 0.3s ease;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px hsla(0, 0%, 0%, 0.12);
   }
 
   @keyframes shimmer {

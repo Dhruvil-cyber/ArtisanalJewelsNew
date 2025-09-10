@@ -161,15 +161,27 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
                 </div>
               </div>
             ) : (
-              <Button 
-                onClick={() => window.location.href = "/api/login"}
-                variant="ghost" 
-                size="sm" 
-                className="p-2 text-muted-foreground hover:text-foreground"
-                data-testid="button-login"
-              >
-                <User size={20} />
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Link href="/login">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-foreground hover:text-accent font-medium"
+                    data-testid="button-login"
+                  >
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button 
+                    size="sm"
+                    className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-4"
+                    data-testid="button-signup"
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
             )}
             
             {/* Wishlist */}

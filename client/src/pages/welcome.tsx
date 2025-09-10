@@ -20,10 +20,7 @@ export default function Welcome() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Header 
-        isMobileMenuOpen={isMobileMenuOpen} 
-        setIsMobileMenuOpen={setIsMobileMenuOpen} 
-      />
+      <Header onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
       
       <MobileMenu 
         isOpen={isMobileMenuOpen} 
@@ -256,7 +253,20 @@ export default function Welcome() {
           </div>
         </section>
 
-        <NewsletterSignup />
+        {/* Newsletter Section */}
+        <section className="py-20 bg-background border-t border-border">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+            <div className="text-center mb-12">
+              <h2 className="font-serif font-bold text-3xl sm:text-4xl text-foreground mb-4">
+                Stay in the Know
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Subscribe to our newsletter for exclusive offers, new collection previews, and jewelry care tips.
+              </p>
+            </div>
+            <NewsletterSignup variant="card" className="max-w-md mx-auto" />
+          </div>
+        </section>
       </main>
 
       <Footer />

@@ -1,43 +1,265 @@
+import { useState } from "react";
 import { Link } from "wouter";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
+import MobileMenu from "@/components/layout/mobile-menu";
+import { PromoBanner } from "@/components/PromoBanner";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { Heart, Shield, Truck, RotateCcw, Star, Check } from "lucide-react";
+import type { Banner } from "@shared/schema";
 
 export default function Welcome() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Fetch banners for the hero section
+  const { data: banners = [] } = useQuery<Banner[]>({
+    queryKey: ["/api/banners", { active: true }],
+  });
+
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center">
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-yellow-400 mb-4 font-serif">
-            Artisanal Jewels
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 font-light">
-            Luxury Jewelry Since 1985
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link href="/login">
-              <Button 
-                className="bg-yellow-400 text-black px-8 py-4 text-lg font-semibold hover:bg-yellow-300 transition-all duration-300 rounded-lg min-w-[120px]"
-                data-testid="button-welcome-login"
-              >
-                Login
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button 
-                variant="outline"
-                className="border-2 border-yellow-400 text-yellow-400 px-8 py-4 text-lg font-semibold hover:bg-yellow-400 hover:text-black transition-all duration-300 rounded-lg min-w-[120px]"
-                data-testid="button-welcome-register"
-              >
-                Register
-              </Button>
-            </Link>
+    <div className="min-h-screen bg-background text-foreground">
+      <Header 
+        isMobileMenuOpen={isMobileMenuOpen} 
+        setIsMobileMenuOpen={setIsMobileMenuOpen} 
+      />
+      
+      <MobileMenu 
+        isOpen={isMobileMenuOpen} 
+        onClose={() => setIsMobileMenuOpen(false)} 
+      />
+
+      <PromoBanner />
+
+      <main>
+        {/* Hero Section */}
+        <section className="relative h-screen flex items-center justify-center overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: banners.length > 0 && banners[0].images && Array.isArray(banners[0].images) && banners[0].images.length > 0
+                ? `url('${banners[0].images[0].url}')`
+                : "url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080')"
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent"></div>
           </div>
           
-          <p className="text-gray-400 text-sm">
-            Melbourne, Australia • +61 451565356
-          </p>
-        </div>
-      </div>
+          <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+            <div className="max-w-2xl">
+              <div className="mb-4">
+                <span className="inline-block px-4 py-2 bg-primary/20 border border-primary rounded-full text-primary font-semibold text-sm tracking-wide">
+                  SINCE 1985 • MELBOURNE, AUSTRALIA
+                </span>
+              </div>
+              <h1 className="font-serif font-bold text-4xl sm:text-5xl lg:text-6xl text-white mb-6 leading-tight">
+                {banners.length > 0 && banners[0].title
+                  ? banners[0].title
+                  : <>Artisanal <span className="gold-accent">Luxury</span> Jewelry</>
+                }
+              </h1>
+              <p className="text-xl text-gray-200 mb-8 leading-relaxed">
+                {banners.length > 0 && banners[0].description
+                  ? banners[0].description
+                  : "Discover our collection of timeless pieces, each meticulously crafted by master artisans using the finest materials and techniques passed down through generations in the heart of Melbourne."
+                }
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/login">
+                  <Button 
+                    className="luxury-border bg-primary hover:bg-primary/90 text-black px-8 py-4 font-semibold transition-all duration-300 transform hover:scale-105"
+                    data-testid="button-hero-login"
+                  >
+                    Login to Browse Collections
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button 
+                    variant="outline" 
+                    className="border-2 border-white text-white hover:bg-white hover:text-black px-8 py-4 font-semibold transition-all duration-300"
+                    data-testid="button-hero-register"
+                  >
+                    Create Account
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+          
+          {/* Trust Indicators */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+            <div className="flex items-center space-x-8 text-white/70">
+              <div className="flex items-center space-x-2">
+                <Shield className="text-accent" size={20} />
+                <span className="text-sm">Lifetime Warranty</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Truck className="text-accent" size={20} />
+                <span className="text-sm">Free Shipping</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RotateCcw className="text-accent" size={20} />
+                <span className="text-sm">30-Day Returns</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Exclusive Collections Section */}
+        <section className="py-20 bg-background">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="font-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-4">
+                Exclusive Collections
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Join our exclusive community to access our premium jewelry collections and personalized recommendations.
+              </p>
+              <div className="mt-8 flex justify-center space-x-4">
+                <Link href="/login">
+                  <Button className="bg-primary hover:bg-primary/90 text-black font-semibold px-6 py-3">
+                    Login to Browse
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-black font-semibold px-6 py-3">
+                    Join Now
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {/* Collection Cards */}
+              {[
+                {
+                  title: "Engagement Rings",
+                  description: "Timeless symbols of love, crafted with the finest diamonds and precious metals.",
+                  price: "From $2,500",
+                  image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400"
+                },
+                {
+                  title: "Necklaces", 
+                  description: "Elegant pieces that grace the neckline with sophistication and style.",
+                  price: "From $890",
+                  image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400"
+                },
+                {
+                  title: "Earrings",
+                  description: "From subtle studs to statement drops, perfect for every occasion.",
+                  price: "From $450", 
+                  image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400"
+                }
+              ].map((collection, index) => (
+                <div key={index} className="card-hover bg-card rounded-lg overflow-hidden shadow-md border border-border">
+                  <img 
+                    src={collection.image} 
+                    alt={`${collection.title} collection`}
+                    className="w-full h-64 object-cover" 
+                  />
+                  <div className="p-6">
+                    <h3 className="font-serif font-semibold text-xl text-foreground mb-2">{collection.title}</h3>
+                    <p className="text-muted-foreground mb-4">{collection.description}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">{collection.price}</span>
+                      <Link href="/login">
+                        <Button 
+                          variant="ghost"
+                          className="text-accent hover:text-accent/80 font-medium"
+                          data-testid={`button-login-${collection.title.toLowerCase().replace(" ", "-")}`}
+                        >
+                          Login to View <span className="ml-2">→</span>
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="text-center mt-12">
+              <Link href="/register">
+                <Button 
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 font-semibold"
+                  data-testid="button-signup-to-view"
+                >
+                  Sign Up to View Products
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Why Join Section */}
+        <section className="py-20 bg-muted">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="font-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-4">
+                Why Join Artisanal Jewels?
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Become part of our exclusive community and unlock premium benefits.
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[
+                {
+                  title: "Exclusive Access",
+                  description: "First access to new collections and limited edition pieces.",
+                  icon: Star
+                },
+                {
+                  title: "Personal Consultant",
+                  description: "Dedicated jewelry consultant for personalized recommendations.",
+                  icon: Heart
+                },
+                {
+                  title: "Premium Rewards",
+                  description: "Earn points with every purchase and unlock special rewards.",
+                  icon: Check
+                },
+                {
+                  title: "Lifetime Support",
+                  description: "Complimentary maintenance and care for all your jewelry.",
+                  icon: Shield
+                }
+              ].map((benefit, index) => {
+                const Icon = benefit.icon;
+                return (
+                  <div key={index} className="text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
+                      <Icon className="text-primary" size={24} />
+                    </div>
+                    <h3 className="font-semibold text-lg text-foreground mb-2">{benefit.title}</h3>
+                    <p className="text-muted-foreground">{benefit.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="text-center mt-12 space-y-4">
+              <div className="flex justify-center space-x-4">
+                <Link href="/login">
+                  <Button className="bg-primary hover:bg-primary/90 text-black font-semibold px-6 py-3">
+                    Already a Member? Login
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-black font-semibold px-6 py-3">
+                    Join Today
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <NewsletterSignup />
+      </main>
+
+      <Footer />
     </div>
   );
 }

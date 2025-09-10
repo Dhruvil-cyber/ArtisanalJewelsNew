@@ -219,7 +219,7 @@ export default function Wishlist() {
                           Out of Stock
                         </Badge>
                       )}
-                      {product.stock > 0 && product.stock <= 5 && (
+                      {(product.stock ?? 0) > 0 && (product.stock ?? 0) <= 5 && (
                         <Badge variant="outline" className="bg-orange-100 text-orange-800">
                           Low Stock
                         </Badge>
@@ -246,9 +246,9 @@ export default function Wishlist() {
                         <p className="price-highlight font-bold text-lg" data-testid={`text-wishlist-product-price-${product.id}`}>
                           {formatPrice(product.basePrice, product.currency)}
                         </p>
-                        {product.stock > 0 && (
+                        {(product.stock ?? 0) > 0 && (
                           <p className="text-xs text-green-600">
-                            {product.stock} available
+                            {product.stock ?? 0} available
                           </p>
                         )}
                       </div>

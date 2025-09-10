@@ -27,6 +27,20 @@ import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import SizeGuide from "@/pages/size-guide";
 import CareInstructions from "@/pages/care-instructions";
+import EngagementRings from "@/pages/engagement-rings";
+import WeddingBands from "@/pages/wedding-bands";
+import Necklaces from "@/pages/necklaces";
+import Earrings from "@/pages/earrings";
+import Bracelets from "@/pages/bracelets";
+import CustomDesign from "@/pages/custom-design";
+import ShippingReturns from "@/pages/shipping-returns";
+import Warranty from "@/pages/warranty";
+import FAQ from "@/pages/faq";
+import OurStory from "@/pages/our-story";
+import Craftsmanship from "@/pages/craftsmanship";
+import Press from "@/pages/press";
+import Careers from "@/pages/careers";
+import EthicsSustainability from "@/pages/ethics-sustainability";
 
 // Remove SimpleLanding - now using dedicated Welcome page
 
@@ -71,6 +85,20 @@ function Router() {
           <Route path="/contact" component={Contact} />
           <Route path="/size-guide" component={SizeGuide} />
           <Route path="/care-instructions" component={CareInstructions} />
+          <Route path="/engagement-rings" component={EngagementRings} />
+          <Route path="/wedding-bands" component={WeddingBands} />
+          <Route path="/necklaces" component={Necklaces} />
+          <Route path="/earrings" component={Earrings} />
+          <Route path="/bracelets" component={Bracelets} />
+          <Route path="/custom-design" component={CustomDesign} />
+          <Route path="/shipping-returns" component={ShippingReturns} />
+          <Route path="/warranty" component={Warranty} />
+          <Route path="/faq" component={FAQ} />
+          <Route path="/our-story" component={OurStory} />
+          <Route path="/craftsmanship" component={Craftsmanship} />
+          <Route path="/press" component={Press} />
+          <Route path="/careers" component={Careers} />
+          <Route path="/ethics-sustainability" component={EthicsSustainability} />
         </>
       ) : (
         <>
@@ -93,6 +121,20 @@ function Router() {
           <Route path="/contact" component={Contact} />
           <Route path="/size-guide" component={SizeGuide} />
           <Route path="/care-instructions" component={CareInstructions} />
+          <Route path="/engagement-rings" component={EngagementRings} />
+          <Route path="/wedding-bands" component={WeddingBands} />
+          <Route path="/necklaces" component={Necklaces} />
+          <Route path="/earrings" component={Earrings} />
+          <Route path="/bracelets" component={Bracelets} />
+          <Route path="/custom-design" component={CustomDesign} />
+          <Route path="/shipping-returns" component={ShippingReturns} />
+          <Route path="/warranty" component={Warranty} />
+          <Route path="/faq" component={FAQ} />
+          <Route path="/our-story" component={OurStory} />
+          <Route path="/craftsmanship" component={Craftsmanship} />
+          <Route path="/press" component={Press} />
+          <Route path="/careers" component={Careers} />
+          <Route path="/ethics-sustainability" component={EthicsSustainability} />
         </>
       )}
       <Route component={NotFound} />

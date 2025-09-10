@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MobileMenu from "@/components/layout/mobile-menu";
@@ -13,6 +14,7 @@ import type { Product, Banner } from "@shared/schema";
 
 export default function Landing() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   // Fetch featured products
   const { data: featuredProducts = [], isLoading } = useQuery<Product[]>({
@@ -71,23 +73,47 @@ export default function Landing() {
                 }
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/catalog">
-                  <Button 
-                    className="luxury-border bg-primary hover:bg-primary/90 text-black px-8 py-4 font-semibold transition-all duration-300 transform hover:scale-105"
-                    data-testid="button-explore-collections"
-                  >
-                    Explore Collections
-                  </Button>
-                </Link>
-                <Link href="/about">
-                  <Button 
-                    variant="outline" 
-                    className="border-2 border-white text-white hover:bg-white hover:text-black px-8 py-4 font-semibold transition-all duration-300"
-                    data-testid="button-watch-story"
-                  >
-                    Our Craftsmanship Story
-                  </Button>
-                </Link>
+                {isAuthenticated ? (
+                  <>
+                    <Link href="/catalog">
+                      <Button 
+                        className="luxury-border bg-primary hover:bg-primary/90 text-black px-8 py-4 font-semibold transition-all duration-300 transform hover:scale-105"
+                        data-testid="button-explore-collections"
+                      >
+                        Explore Collections
+                      </Button>
+                    </Link>
+                    <Link href="/about">
+                      <Button 
+                        variant="outline" 
+                        className="border-2 border-white text-white hover:bg-white hover:text-black px-8 py-4 font-semibold transition-all duration-300"
+                        data-testid="button-watch-story"
+                      >
+                        Our Craftsmanship Story
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login">
+                      <Button 
+                        className="luxury-border bg-primary hover:bg-primary/90 text-black px-8 py-4 font-semibold transition-all duration-300 transform hover:scale-105"
+                        data-testid="button-visitor-login"
+                      >
+                        Login to View Collections
+                      </Button>
+                    </Link>
+                    <Link href="/register">
+                      <Button 
+                        variant="outline" 
+                        className="border-2 border-white text-white hover:bg-white hover:text-black px-8 py-4 font-semibold transition-all duration-300"
+                        data-testid="button-visitor-signup"
+                      >
+                        Create Account
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -116,11 +142,28 @@ export default function Landing() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="font-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-4">
-                Featured Collections
+                {isAuthenticated ? "Featured Collections" : "Exclusive Collections"}
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Explore our carefully curated collections, each telling a unique story of craftsmanship and elegance.
+                {isAuthenticated 
+                  ? "Explore our carefully curated collections, each telling a unique story of craftsmanship and elegance."
+                  : "Join our exclusive community to access our premium jewelry collections and personalized recommendations."
+                }
               </p>
+              {!isAuthenticated && (
+                <div className="mt-8 flex justify-center space-x-4">
+                  <Link href="/login">
+                    <Button className="bg-primary hover:bg-primary/90 text-black font-semibold px-6 py-3">
+                      Login to Browse
+                    </Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-black font-semibold px-6 py-3">
+                      Join Now
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -156,13 +199,25 @@ export default function Landing() {
                     <p className="text-muted-foreground mb-4">{collection.description}</p>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">{collection.price}</span>
-                      <Button 
-                        variant="ghost"
-                        className="text-accent hover:text-accent/80 font-medium"
-                        data-testid={`button-explore-${collection.title.toLowerCase().replace(" ", "-")}`}
-                      >
-                        Explore Collection <span className="ml-2">→</span>
-                      </Button>
+                      {isAuthenticated ? (
+                        <Button 
+                          variant="ghost"
+                          className="text-accent hover:text-accent/80 font-medium"
+                          data-testid={`button-explore-${collection.title.toLowerCase().replace(" ", "-")}`}
+                        >
+                          Explore Collection <span className="ml-2">→</span>
+                        </Button>
+                      ) : (
+                        <Link href="/login">
+                          <Button 
+                            variant="ghost"
+                            className="text-accent hover:text-accent/80 font-medium"
+                            data-testid={`button-login-${collection.title.toLowerCase().replace(" ", "-")}`}
+                          >
+                            Login to View <span className="ml-2">→</span>
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -170,56 +225,69 @@ export default function Landing() {
             </div>
             
             <div className="text-center mt-12">
-              <Link href="/catalog">
-                <Button 
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 font-semibold"
-                  data-testid="button-view-all-products"
-                >
-                  View All Products
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <Link href="/catalog">
+                  <Button 
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 font-semibold"
+                    data-testid="button-view-all-products"
+                  >
+                    View All Products
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/register">
+                  <Button 
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 font-semibold"
+                    data-testid="button-signup-to-view"
+                  >
+                    Sign Up to View Products
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </section>
 
-        {/* Featured Products */}
-        <section className="py-20 bg-muted">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="font-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-4">
-                Bestsellers
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Our most loved pieces, chosen by discerning customers worldwide.
-              </p>
-            </div>
-            
-            {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="bg-card rounded-lg border border-border p-4">
-                    <div className="loading-shimmer w-full h-64 rounded bg-muted mb-4"></div>
-                    <div className="loading-shimmer w-3/4 h-4 rounded bg-muted mb-2"></div>
-                    <div className="loading-shimmer w-1/2 h-4 rounded bg-muted"></div>
-                  </div>
-                ))}
+        {/* Featured Products - Only show for authenticated users */}
+        {isAuthenticated && (
+          <section className="py-20 bg-muted">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-16">
+                <h2 className="font-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-foreground mb-4">
+                  Bestsellers
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Our most loved pieces, chosen by discerning customers worldwide.
+                </p>
               </div>
-            ) : (
-              <ProductGrid products={featuredProducts} />
-            )}
-            
-            <div className="text-center mt-12">
-              <Link href="/catalog">
-                <Button 
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 font-semibold"
-                  data-testid="button-view-all-products-featured"
-                >
-                  View All Products
-                </Button>
-              </Link>
+              
+              {isLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="bg-card rounded-lg border border-border p-4">
+                      <div className="loading-shimmer w-full h-64 rounded bg-muted mb-4"></div>
+                      <div className="loading-shimmer w-3/4 h-4 rounded bg-muted mb-2"></div>
+                      <div className="loading-shimmer w-1/2 h-4 rounded bg-muted"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <ProductGrid products={featuredProducts} />
+              )}
+              
+              <div className="text-center mt-12">
+                <Link href="/catalog">
+                  <Button 
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 font-semibold"
+                    data-testid="button-view-all-products-featured"
+                  >
+                    View All Products
+                  </Button>
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Craftsmanship Section */}
         <section className="py-20 bg-background">

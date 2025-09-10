@@ -88,8 +88,19 @@ export default function Wishlist() {
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Please log in",
-          description: "You need to be logged in to add items to cart.",
+          title: "Please log in or register",
+          description: (
+            <div>
+              You need an account to add items to cart.{" "}
+              <a href="/login" className="underline font-medium">
+                Login
+              </a>{" "}
+              or{" "}
+              <a href="/register" className="underline font-medium">
+                Sign up
+              </a>
+            </div>
+          ),
           variant: "destructive",
         });
         return;

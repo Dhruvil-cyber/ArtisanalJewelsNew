@@ -54,8 +54,19 @@ export default function ProductDetail() {
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Please log in",
-          description: "You need to be logged in to add items to cart.",
+          title: "Please log in or register",
+          description: (
+            <div>
+              You need an account to add items to cart.{" "}
+              <a href="/login" className="underline font-medium">
+                Login
+              </a>{" "}
+              or{" "}
+              <a href="/register" className="underline font-medium">
+                Sign up
+              </a>
+            </div>
+          ),
           variant: "destructive",
         });
         return;
@@ -83,13 +94,21 @@ export default function ProductDetail() {
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: "Please log in or register",
+          description: (
+            <div>
+              You need an account to save items to your wishlist.{" "}
+              <a href="/login" className="underline font-medium">
+                Login
+              </a>{" "}
+              or{" "}
+              <a href="/register" className="underline font-medium">
+                Sign up
+              </a>
+            </div>
+          ),
           variant: "destructive",
         });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
         return;
       }
       toast({

@@ -33,19 +33,24 @@ export default function Catalog() {
     sortBy: "newest",
   });
 
-  const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
+  const { data: products = [], isLoading: productsLoading } = useQuery<
+    Product[]
+  >({
     queryKey: ["/api/products", filters],
     queryFn: () => {
       const params = new URLSearchParams();
       if (filters.search) params.set("search", filters.search);
-      if (filters.category && filters.category !== "all-categories") params.set("category", filters.category);
+      if (filters.category && filters.category !== "all-categories")
+        params.set("category", filters.category);
       if (filters.minPrice) params.set("minPrice", filters.minPrice);
       if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
-      if (filters.metal && filters.metal !== "all-metals") params.set("metal", filters.metal);
-      if (filters.gemstone && filters.gemstone !== "all-gemstones") params.set("gemstone", filters.gemstone);
+      if (filters.metal && filters.metal !== "all-metals")
+        params.set("metal", filters.metal);
+      if (filters.gemstone && filters.gemstone !== "all-gemstones")
+        params.set("gemstone", filters.gemstone);
       params.set("limit", "24");
-      
-      return fetch(`/api/products?${params}`).then(res => res.json());
+
+      return fetch(`/api/products?${params}`).then((res) => res.json());
     },
   });
 
@@ -54,7 +59,7 @@ export default function Catalog() {
   });
 
   const handleFilterChange = (newFilters: Partial<ProductFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -65,9 +70,9 @@ export default function Catalog() {
   return (
     <div className="min-h-screen bg-background">
       <Header onMobileMenuToggle={() => setIsMobileMenuOpen(true)} />
-      <MobileMenu 
-        isOpen={isMobileMenuOpen} 
-        onClose={() => setIsMobileMenuOpen(false)} 
+      <MobileMenu
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
       />
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -77,14 +82,18 @@ export default function Catalog() {
             Our Collection
           </h1>
           <p className="text-lg text-muted-foreground">
-            Discover exquisite handcrafted jewelry pieces made with the finest materials.
+            Discover exquisite handcrafted jewelry pieces made with the finest
+            materials.
           </p>
         </div>
 
         {/* Search */}
         <form onSubmit={handleSearch} className="mb-8">
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+              size={20}
+            />
             <Input
               type="text"
               placeholder="Search for jewelry..."
@@ -98,20 +107,24 @@ export default function Catalog() {
 
         {/* Mobile Filter Toggle */}
         <div className="lg:hidden mb-6">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setIsFiltersOpen(!isFiltersOpen)}
             className="w-full justify-between"
             data-testid="button-toggle-filters"
           >
             Filter & Sort
-            <span className="text-muted-foreground">{isFiltersOpen ? "Hide" : "Show"}</span>
+            <span className="text-muted-foreground">
+              {isFiltersOpen ? "Hide" : "Show"}
+            </span>
           </Button>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
           {/* Filters Sidebar */}
-          <aside className={`sticky top-24 h-fit ${isFiltersOpen ? 'block' : 'hidden lg:block'}`}>
+          <aside
+            className={`sticky top-24 h-fit ${isFiltersOpen ? "block" : "hidden lg:block"}`}
+          >
             <ProductFilters
               categories={categories}
               filters={filters}
@@ -123,14 +136,19 @@ export default function Catalog() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <p className="text-muted-foreground">
-                {productsLoading ? "Loading..." : `${products.length} products found`}
+                {productsLoading
+                  ? "Loading..."
+                  : `${products.length} products found`}
               </p>
             </div>
 
             {productsLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(9)].map((_, i) => (
-                  <div key={i} className="bg-card rounded-lg border border-border p-4">
+                  <div
+                    key={i}
+                    className="bg-card rounded-lg border border-border p-4"
+                  >
                     <div className="loading-shimmer w-full h-64 rounded bg-muted mb-4"></div>
                     <div className="loading-shimmer w-3/4 h-4 rounded bg-muted mb-2"></div>
                     <div className="loading-shimmer w-1/2 h-4 rounded bg-muted"></div>
@@ -139,18 +157,22 @@ export default function Catalog() {
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground text-lg">No products found matching your criteria.</p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setFilters({
-                    search: "",
-                    category: "all-categories",
-                    minPrice: "",
-                    maxPrice: "",
-                    metal: "all-metals",
-                    gemstone: "all-gemstones",
-                    sortBy: "newest",
-                  })}
+                <p className="text-muted-foreground text-lg">
+                  No products found matching your criteria.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setFilters({
+                      search: "",
+                      category: "all-categories",
+                      minPrice: "",
+                      maxPrice: "",
+                      metal: "all-metals",
+                      gemstone: "all-gemstones",
+                      sortBy: "newest",
+                    })
+                  }
                   className="mt-4"
                   data-testid="button-clear-filters"
                 >

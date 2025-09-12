@@ -22,6 +22,7 @@ interface ProductFilters {
 
 export default function Catalog() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<ProductFilters>({
     search: "",
     category: "all-categories",
@@ -95,9 +96,22 @@ export default function Catalog() {
           </div>
         </form>
 
+        {/* Mobile Filter Toggle */}
+        <div className="lg:hidden mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+            className="w-full justify-between"
+            data-testid="button-toggle-filters"
+          >
+            Filter & Sort
+            <span className="text-muted-foreground">{isFiltersOpen ? "Hide" : "Show"}</span>
+          </Button>
+        </div>
+
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
           {/* Filters Sidebar */}
-          <aside className="sticky top-24 h-fit">
+          <aside className={`sticky top-24 h-fit ${isFiltersOpen ? 'block' : 'hidden lg:block'}`}>
             <ProductFilters
               categories={categories}
               filters={filters}

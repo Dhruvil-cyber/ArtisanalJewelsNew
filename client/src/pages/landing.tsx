@@ -119,19 +119,19 @@ export default function Landing() {
           </div>
           
           {/* Trust Indicators */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-            <div className="flex items-center space-x-8 text-white/70">
+          <div className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 w-full px-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-8 text-white/70 text-center">
               <div className="flex items-center space-x-2">
-                <Shield className="text-accent" size={20} />
-                <span className="text-sm">Lifetime Warranty</span>
+                <Shield className="text-accent w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-xs sm:text-sm">Lifetime Warranty</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Truck className="text-accent" size={20} />
-                <span className="text-sm">Free Shipping</span>
+                <Truck className="text-accent w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-xs sm:text-sm">Free Shipping</span>
               </div>
               <div className="flex items-center space-x-2">
-                <RotateCcw className="text-accent" size={20} />
-                <span className="text-sm">30-Day Returns</span>
+                <RotateCcw className="text-accent w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-xs sm:text-sm">30-Day Returns</span>
               </div>
             </div>
           </div>

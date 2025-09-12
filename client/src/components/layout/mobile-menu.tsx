@@ -17,7 +17,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
       <div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
-      <div className="absolute right-0 top-0 h-full w-80 bg-background shadow-xl transform transition-transform duration-300">
+      <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-background shadow-xl transform transition-transform duration-300">
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
             <span className="font-serif font-semibold text-xl text-primary">Menu</span>

@@ -44,7 +44,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
                 <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                   <Gem className="text-accent" size={16} />
                 </div>
-                <span className="font-serif font-semibold text-xl text-primary">Artisanal Jewels</span>
+                <span className="font-serif font-semibold text-lg sm:text-xl text-primary">Artisanal Jewels</span>
               </div>
             </Link>
           </div>

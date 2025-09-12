@@ -146,18 +146,17 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 </Button>
               </>
             ) : (
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start py-3 text-foreground font-medium"
-                onClick={() => {
-                  onClose();
-                  window.location.href = "/api/login";
-                }}
-                data-testid="button-mobile-login"
-              >
-                <User size={16} className="mr-3" />
-                Sign In
-              </Button>
+              <Link href="/login">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start py-3 text-foreground font-medium"
+                  onClick={onClose}
+                  data-testid="button-mobile-login"
+                >
+                  <User size={16} className="mr-3" />
+                  Sign In
+                </Button>
+              </Link>
             )}
           </nav>
         </div>

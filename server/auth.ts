@@ -55,7 +55,7 @@ export function authenticateToken(req: AuthenticatedRequest, res: Response, next
   next();
 }
 
-export async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export async function requireAuth(req: any, res: Response, next: NextFunction) {
   const token = req.cookies?.authToken || req.headers.authorization?.split(' ')[1];
 
   if (!token) {
@@ -86,7 +86,7 @@ export async function requireAuth(req: AuthenticatedRequest, res: Response, next
   next();
 }
 
-export function requireAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export function requireAdmin(req: any, res: Response, next: NextFunction) {
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Admin access required' });
   }

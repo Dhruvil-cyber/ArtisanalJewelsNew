@@ -120,18 +120,18 @@ export default function Landing() {
           
           {/* Trust Indicators */}
           <div className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 w-full px-4">
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-8 text-white/70 text-center">
-              <div className="flex items-center space-x-2">
-                <Shield className="text-accent w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="text-xs sm:text-sm">Lifetime Warranty</span>
+            <div className="block lg:flex lg:items-center lg:justify-center lg:space-x-8 text-white/70 text-center space-y-2 lg:space-y-0">
+              <div className="flex items-center justify-center gap-2">
+                <Shield className="text-accent w-4 h-4 lg:w-5 lg:h-5" />
+                <span className="text-xs lg:text-sm">Lifetime Warranty</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <Truck className="text-accent w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="text-xs sm:text-sm">Free Shipping</span>
+              <div className="flex items-center justify-center gap-2">
+                <Truck className="text-accent w-4 h-4 lg:w-5 lg:h-5" />
+                <span className="text-xs lg:text-sm">Free Shipping</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <RotateCcw className="text-accent w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="text-xs sm:text-sm">30-Day Returns</span>
+              <div className="flex items-center justify-center gap-2">
+                <RotateCcw className="text-accent w-4 h-4 lg:w-5 lg:h-5" />
+                <span className="text-xs lg:text-sm">30-Day Returns</span>
               </div>
             </div>
           </div>

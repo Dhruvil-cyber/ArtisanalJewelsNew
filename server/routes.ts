@@ -97,6 +97,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Redirect /api/login to client-side login page (compatibility)
+  app.get('/api/login', (req, res) => {
+    res.redirect('/login');
+  });
+
   // Handle both GET and POST logout for compatibility
   app.get('/api/logout', (req, res) => {
     res.clearCookie('authToken');
@@ -108,9 +113,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: "Logged out successfully" });
   });
 
-  app.get('/api/auth/user', requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/auth/user', requireAuth, async (req, res) => {
     try {
-      const user = await storage.getUser(req.user!.id);
+      const authReq = req as AuthenticatedRequest;
+      const user = await storage.getUser(authReq.user!.id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -205,9 +211,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cart routes
-  app.get("/api/cart", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/cart", requireAuth, async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user!.id;
       const sessionId = req.headers['x-session-id'] as string;
       
       const items = await storage.getCartItems(userId, sessionId);
@@ -218,9 +225,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/cart", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/cart", requireAuth, async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user!.id;
       const sessionId = req.headers['x-session-id'] as string;
       const { productId, variantId, quantity = 1 } = req.body;
 
@@ -264,8 +272,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment routes (Stripe)
-  app.post("/api/create-payment-intent", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/create-payment-intent", requireAuth, async (req, res) => {
     try {
+      const authReq = req as AuthenticatedRequest;
       const { cartItems, amount, currency = 'aud' } = req.body;
       
       if (!amount || amount <= 0) {
@@ -274,10 +283,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create customer for Indian export regulations compliance
       const customer = await stripe.customers.create({
-        name: req.user!.firstName && req.user!.lastName 
-          ? `${req.user!.firstName} ${req.user!.lastName}` 
+        name: authReq.user!.firstName && authReq.user!.lastName 
+          ? `${authReq.user!.firstName} ${authReq.user!.lastName}` 
           : 'Customer',
-        email: req.user!.email || undefined,
+        email: authReq.user!.email || undefined,
         address: {
           line1: '123 Sample Street',
           city: 'International City',
@@ -294,8 +303,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: "Artisanal Jewels - Luxury jewelry purchase from Melbourne, Australia",
         customer: customer.id,
         shipping: {
-          name: req.user!.firstName && req.user!.lastName 
-            ? `${req.user!.firstName} ${req.user!.lastName}` 
+          name: authReq.user!.firstName && authReq.user!.lastName 
+            ? `${authReq.user!.firstName} ${authReq.user!.lastName}` 
             : 'Customer',
           address: {
             line1: '123 Sample Street',
@@ -306,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         },
         metadata: {
-          userId: req.user!.id,
+          userId: authReq.user!.id,
           itemCount: cartItems?.length?.toString() || "0"
         },
         automatic_payment_methods: {
@@ -324,8 +333,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/confirm-payment", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/confirm-payment", requireAuth, async (req, res) => {
     try {
+      const authReq = req as AuthenticatedRequest;
       const { paymentIntentId, shippingAddress } = req.body;
       
       if (!paymentIntentId) {
@@ -340,7 +350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get user's cart items
-      const userId = req.user!.id;
+      const userId = authReq.user!.id;
       const sessionId = req.headers['x-session-id'] as string;
       const cartItems = await storage.getCartItems(userId, sessionId);
       
@@ -359,7 +369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create order in database
       const orderData = {
         userId,
-        email: req.user!.email,
+        email: authReq.user!.email,
         items: cartItems.map(item => ({
           productId: item.productId,
           variantId: item.variantId,
@@ -396,9 +406,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Wishlist routes (protected)
-  app.get("/api/wishlist", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/wishlist", requireAuth, async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user!.id;
       const wishlistIds = await storage.getWishlist(userId);
       
       // Get full product details for wishlist items
@@ -417,9 +428,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/wishlist", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/wishlist", requireAuth, async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user!.id;
       const { productId } = req.body;
 
       await storage.addToWishlist(userId, productId);
@@ -430,9 +442,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/wishlist/:productId", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.delete("/api/wishlist/:productId", requireAuth, async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user!.id;
       const productId = parseInt(req.params.productId);
 
       await storage.removeFromWishlist(userId, productId);
@@ -444,9 +457,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Orders (protected)
-  app.get("/api/orders", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/orders", requireAuth, async (req, res) => {
     try {
-      const userId = req.user?.id;
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user?.id;
       const orders = await storage.getOrders(userId);
       res.json(orders);
     } catch (error) {
@@ -459,10 +473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const order = await storage.createOrder(req.body);
       
-      // Clear cart after order creation
-      const userId = req.user!.id;
-      const sessionId = req.session?.id || req.headers['x-session-id'] as string;
-      await storage.clearCart(userId, sessionId);
+      // Note: Cart clearing is handled in confirm-payment endpoint instead
       
       res.status(201).json(order);
     } catch (error) {
@@ -483,18 +494,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/products/:id/reviews", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/products/:id/reviews", requireAuth, async (req, res) => {
     try {
+      const authReq = req as AuthenticatedRequest;
       const productId = parseInt(req.params.id);
-      const userId = req.user!.id;
+      const userId = authReq.user!.id;
       const { rating, title, comment } = req.body;
 
       const review = await storage.createReview({
         productId,
         userId,
-        customerName: req.user.firstName ? 
-          `${req.user.firstName} ${req.user.lastName || ''}`.trim() :
-          req.user.email?.split('@')[0] || 'Anonymous',
+        customerName: authReq.user?.firstName ? 
+          `${authReq.user.firstName} ${authReq.user.lastName || ''}`.trim() :
+          authReq.user?.email?.split('@')[0] || 'Anonymous',
         rating,
         title,
         comment,
@@ -632,10 +644,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin Analytics API endpoints
-  app.get("/api/admin/analytics/overview", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/admin/analytics/overview", requireAuth, async (req, res) => {
     try {
+      const authReq = req as AuthenticatedRequest;
       // Check if user has admin role
-      const user = await storage.getUser(req.user!.id);
+      const user = await storage.getUser(authReq.user!.id);
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -668,10 +681,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/analytics/revenue", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/admin/analytics/revenue", requireAuth, async (req, res) => {
     try {
+      const authReq = req as AuthenticatedRequest;
       // Check if user has admin role
-      const user = await storage.getUser(req.user!.id);
+      const user = await storage.getUser(authReq.user!.id);
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -688,10 +702,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/analytics/products", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/admin/analytics/products", requireAuth, async (req, res) => {
     try {
+      const authReq = req as AuthenticatedRequest;
       // Check if user has admin role
-      const user = await storage.getUser(req.user!.id);
+      const user = await storage.getUser(authReq.user!.id);
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -710,10 +725,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/analytics/customers", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/admin/analytics/customers", requireAuth, async (req, res) => {
     try {
+      const authReq = req as AuthenticatedRequest;
       // Check if user has admin role
-      const user = await storage.getUser(req.user!.id);
+      const user = await storage.getUser(authReq.user!.id);
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }

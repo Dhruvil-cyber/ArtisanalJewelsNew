@@ -336,7 +336,7 @@ export default function Landing() {
                 </Button>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <img 
                   src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
                   alt="Artisan crafting jewelry in workshop" 
@@ -345,12 +345,12 @@ export default function Landing() {
                 <img 
                   src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
                   alt="Close-up of jewelry crafting tools and gems" 
-                  className="rounded-lg shadow-lg mt-8" 
+                  className="rounded-lg shadow-lg sm:mt-8" 
                 />
                 <img 
                   src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
                   alt="Master jeweler inspecting a diamond" 
-                  className="rounded-lg shadow-lg -mt-8" 
+                  className="rounded-lg shadow-lg sm:-mt-8" 
                 />
                 <img 
                   src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
@@ -366,7 +366,7 @@ export default function Landing() {
         <section className="py-20 bg-muted">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             {/* Trust Badges */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
               {[
                 { icon: Shield, title: "Lifetime Warranty", description: "Comprehensive coverage on all craftsmanship" },
                 { icon: Star, title: "Certified Gemstones", description: "GIA certified diamonds and precious stones" },
@@ -377,8 +377,8 @@ export default function Landing() {
                   <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-3">
                     <badge.icon className="text-accent-foreground" size={24} />
                   </div>
-                  <h4 className="font-semibold text-foreground mb-2">{badge.title}</h4>
-                  <p className="text-sm text-muted-foreground">{badge.description}</p>
+                  <h4 className="font-semibold text-foreground mb-2 text-sm sm:text-base">{badge.title}</h4>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{badge.description}</p>
                 </div>
               ))}
             </div>

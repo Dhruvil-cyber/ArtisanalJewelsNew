@@ -35,16 +35,16 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-8">
+        <div className="flex h-14 sm:h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/">
-              <div className="flex items-center space-x-2" data-testid="link-home">
-                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                  <Gem className="text-accent" size={16} />
+              <div className="flex items-center space-x-1.5 sm:space-x-2" data-testid="link-home">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center">
+                  <Gem className="text-accent" size={14} />
                 </div>
-                <span className="font-serif font-semibold text-lg sm:text-xl text-primary">Artisanal Jewels</span>
+                <span className="font-serif font-semibold text-base sm:text-lg lg:text-xl text-primary">Artisanal Jewels</span>
               </div>
             </Link>
           </div>

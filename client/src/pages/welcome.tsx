@@ -31,7 +31,7 @@ export default function Welcome() {
 
       <main>
         {/* Hero Section */}
-        <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        <section className="relative h-[90vh] min-h-[500px] sm:h-[80vh] sm:min-h-[600px] flex items-center justify-center overflow-hidden">
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
@@ -44,37 +44,37 @@ export default function Welcome() {
           </div>
           
           <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-            <div className="max-w-2xl">
-              <div className="mb-4">
-                <span className="inline-block px-4 py-2 bg-primary/20 border border-primary rounded-full text-primary font-semibold text-sm tracking-wide">
+            <div className="max-w-2xl w-full">
+              <div className="mb-3 sm:mb-4">
+                <span className="inline-block px-3 py-1.5 sm:px-4 sm:py-2 bg-primary/20 border border-primary rounded-full text-primary font-semibold text-xs sm:text-sm tracking-wide">
                   SINCE 1985 • MELBOURNE, AUSTRALIA
                 </span>
               </div>
-              <h1 className="font-serif font-bold text-4xl sm:text-5xl lg:text-6xl text-white mb-6 leading-tight">
+              <h1 className="font-serif font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white mb-4 sm:mb-6 leading-tight">
                 {banners.length > 0 && banners[0].title
                   ? banners[0].title
                   : <>Artisanal <span className="gold-accent">Luxury</span> Jewelry</>
                 }
               </h1>
-              <p className="text-xl text-gray-200 mb-8 leading-relaxed">
+              <p className="text-base sm:text-lg lg:text-xl text-gray-200 mb-6 sm:mb-8 leading-relaxed">
                 {banners.length > 0 && banners[0].description
                   ? banners[0].description
                   : "Discover our collection of timeless pieces, each meticulously crafted by master artisans using the finest materials and techniques passed down through generations in the heart of Melbourne."
                 }
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/login">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <Link href="/login" className="w-full sm:w-auto">
                   <Button 
-                    className="luxury-border bg-primary hover:bg-primary/90 text-black px-8 py-4 font-semibold transition-all duration-300 transform hover:scale-105"
+                    className="w-full luxury-border bg-primary hover:bg-primary/90 text-black px-6 py-3 sm:px-8 sm:py-4 font-semibold transition-all duration-300 transform hover:scale-105"
                     data-testid="button-hero-login"
                   >
                     Login to Browse Collections
                   </Button>
                 </Link>
-                <Link href="/register">
+                <Link href="/register" className="w-full sm:w-auto">
                   <Button 
                     variant="outline" 
-                    className="border-2 border-white text-white hover:bg-white hover:text-black px-8 py-4 font-semibold transition-all duration-300"
+                    className="w-full border-2 border-white text-white hover:bg-white hover:text-black px-6 py-3 sm:px-8 sm:py-4 font-semibold transition-all duration-300"
                     data-testid="button-hero-register"
                   >
                     Create Account
@@ -85,19 +85,19 @@ export default function Welcome() {
           </div>
           
           {/* Trust Indicators */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-            <div className="flex items-center space-x-8 text-white/70">
-              <div className="flex items-center space-x-2">
-                <Shield className="text-accent" size={20} />
-                <span className="text-sm">Lifetime Warranty</span>
+          <div className="absolute bottom-2 sm:bottom-4 lg:bottom-8 left-1/2 transform -translate-x-1/2 w-full px-2 sm:px-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 lg:gap-8 text-white/70 text-center">
+              <div className="flex items-center justify-center gap-2">
+                <Shield className="text-accent w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                <span className="text-xs sm:text-xs lg:text-sm">Lifetime Warranty</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <Truck className="text-accent" size={20} />
-                <span className="text-sm">Free Shipping</span>
+              <div className="flex items-center justify-center gap-2">
+                <Truck className="text-accent w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                <span className="text-xs sm:text-xs lg:text-sm">Free Shipping</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <RotateCcw className="text-accent" size={20} />
-                <span className="text-sm">30-Day Returns</span>
+              <div className="flex items-center justify-center gap-2">
+                <RotateCcw className="text-accent w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                <span className="text-xs sm:text-xs lg:text-sm">30-Day Returns</span>
               </div>
             </div>
           </div>

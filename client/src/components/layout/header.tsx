@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "wouter";
-import { Search, User, Heart, ShoppingBag, Menu, Gem } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Search, User, Heart, ShoppingBag, Menu, Gem, ChevronDown } from "lucide-react";
 import type { CartItem } from "@shared/schema";
 
 interface HeaderProps {
@@ -15,6 +15,8 @@ interface HeaderProps {
 export default function Header({ onMobileMenuToggle }: HeaderProps) {
   const { isAuthenticated, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [, setLocation] = useLocation();
 
   const { data: cartItems = [] } = useQuery<CartItem[]>({
     queryKey: ["/api/cart"],
@@ -29,8 +31,13 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/catalog?search=${encodeURIComponent(searchQuery)}`;
+      setLocation(`/catalog?search=${encodeURIComponent(searchQuery)}`);
+      setShowMobileSearch(false);
     }
+  };
+
+  const handleMobileSearchToggle = () => {
+    setShowMobileSearch(!showMobileSearch);
   };
 
   return (
@@ -42,7 +49,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             <Link href="/">
               <div className="flex items-center space-x-1.5 sm:space-x-2" data-testid="link-home">
                 <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center">
-                  <Gem className="text-accent" size={14} />
+                  <Gem className="text-primary-foreground" size={14} />
                 </div>
                 <span className="font-serif font-semibold text-base sm:text-lg lg:text-xl text-primary">Artisanal Jewels</span>
               </div>
@@ -53,49 +60,36 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
           <nav className="hidden lg:flex items-center space-x-8">
             <div className="nav-item relative">
               <Link href="/catalog">
-                <span className="text-foreground hover:text-accent transition-colors font-medium cursor-pointer" data-testid="link-collections">
-                  Collections
-                </span>
+                <div className="flex items-center space-x-1 text-foreground hover:text-accent transition-colors font-medium cursor-pointer" data-testid="link-collections">
+                  <span>Collections</span>
+                  <ChevronDown size={16} className="transition-transform duration-200" />
+                </div>
               </Link>
               <div className="nav-dropdown absolute top-full left-0 mt-2 w-64 bg-card rounded-lg shadow-lg border border-border p-4">
                 <div className="space-y-2">
-                  <Link href="/catalog?category=engagement-rings">
-                    <span className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer">
-                      Engagement Rings
-                    </span>
+                  <Link href="/catalog?category=engagement-rings" className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors">
+                    Engagement Rings
                   </Link>
-                  <Link href="/catalog?category=necklaces">
-                    <span className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer">
-                      Necklaces
-                    </span>
+                  <Link href="/catalog?category=necklaces" className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors">
+                    Necklaces
                   </Link>
-                  <Link href="/catalog?category=earrings">
-                    <span className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer">
-                      Earrings
-                    </span>
+                  <Link href="/catalog?category=earrings" className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors">
+                    Earrings
                   </Link>
-                  <Link href="/catalog?category=bracelets">
-                    <span className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer">
-                      Bracelets
-                    </span>
+                  <Link href="/catalog?category=bracelets" className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors">
+                    Bracelets
                   </Link>
                 </div>
               </div>
             </div>
-            <Link href="/about">
-              <span className="text-foreground hover:text-accent transition-colors font-medium cursor-pointer" data-testid="link-about">
-                About
-              </span>
+            <Link href="/about" className="text-foreground hover:text-accent transition-colors font-medium" data-testid="link-about">
+              About
             </Link>
-            <Link href="/craftsmanship">
-              <span className="text-foreground hover:text-accent transition-colors font-medium cursor-pointer" data-testid="link-craftsmanship">
-                Craftsmanship
-              </span>
+            <Link href="/craftsmanship" className="text-foreground hover:text-accent transition-colors font-medium" data-testid="link-craftsmanship">
+              Craftsmanship
             </Link>
-            <Link href="/contact">
-              <span className="text-foreground hover:text-accent transition-colors font-medium cursor-pointer" data-testid="link-contact">
-                Contact
-              </span>
+            <Link href="/contact" className="text-foreground hover:text-accent transition-colors font-medium" data-testid="link-contact">
+              Contact
             </Link>
           </nav>
 
@@ -120,6 +114,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             <Button 
               variant="ghost" 
               size="sm" 
+              onClick={handleMobileSearchToggle}
               className="md:hidden p-2 text-muted-foreground hover:text-foreground"
               data-testid="button-search-mobile"
             >
@@ -139,16 +134,12 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
                 </Button>
                 <div className="nav-dropdown absolute top-full right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border p-2">
                   <div className="space-y-1">
-                    <Link href="/account">
-                      <span className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer">
-                        Dashboard
-                      </span>
+                    <Link href="/account" className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors">
+                      Dashboard
                     </Link>
                     {(user as any)?.role === "admin" && (
-                      <Link href="/admin">
-                        <span className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer">
-                          Admin Panel
-                        </span>
+                      <Link href="/admin" className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors">
+                        Admin Panel
                       </Link>
                     )}
                     <a 
@@ -236,6 +227,26 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             </Button>
           </div>
         </div>
+        
+        {/* Mobile Search Bar */}
+        {showMobileSearch && (
+          <div className="md:hidden border-t border-border bg-background/95 px-3 py-3">
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
+                <Input
+                  type="search"
+                  placeholder="Search jewelry..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 w-full"
+                  data-testid="input-mobile-search"
+                  autoFocus
+                />
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </header>
   );

@@ -163,12 +163,28 @@
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.3s ease;
+    z-index: 50;
   }
 
   .nav-item:hover .nav-dropdown {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+  }
+
+  .nav-item:hover svg {
+    transform: rotate(180deg);
+  }
+
+  /* Header responsive improvements */
+  @media (max-width: 1024px) {
+    .nav-item .nav-dropdown {
+      position: fixed;
+      top: auto;
+      left: 1rem;
+      right: 1rem;
+      width: auto;
+    }
   }
 
   /* Mobile responsive improvements */

@@ -144,7 +144,7 @@ The Artisanal Jewels Team`;
 
   return sendEmail({
     to: email,
-    from: 'noreply@artisanaljewels.com',
+    from: 'dhruvilsavani123@gmail.com',
     subject: 'Welcome to Artisanal Jewels Newsletter! ✨',
     text,
     html
@@ -310,7 +310,7 @@ The Artisanal Jewels Team`;
 
   return sendEmail({
     to: email,
-    from: 'noreply@artisanaljewels.com',
+    from: 'dhruvilsavani123@gmail.com',
     subject,
     text,
     html

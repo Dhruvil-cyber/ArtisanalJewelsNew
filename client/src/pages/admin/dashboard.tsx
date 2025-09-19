@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/formatters";
-import { Package, Users, DollarSign, TrendingUp, Plus, BarChart3, AlertTriangle, UserCheck } from "lucide-react";
+import { Package, Users, DollarSign, TrendingUp, Plus, BarChart3, AlertTriangle, UserCheck, Mail } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 import type { Product, Order } from "@shared/schema";
@@ -286,6 +286,12 @@ export default function AdminDashboard() {
                 <Button className="w-full justify-start" variant="outline" data-testid="button-customers">
                   <UserCheck size={16} className="mr-2" />
                   Customer Management
+                </Button>
+              </Link>
+              <Link href="/admin/newsletter">
+                <Button className="w-full justify-start" variant="outline" data-testid="button-newsletter">
+                  <Mail size={16} className="mr-2" />
+                  Newsletter Management
                 </Button>
               </Link>
             </CardContent>

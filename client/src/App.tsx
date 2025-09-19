@@ -23,6 +23,7 @@ import AdminProducts from "@/pages/admin/products";
 import AdminBanners from "@/pages/admin/banners";
 import AdminAnalytics from "@/pages/admin/analytics";
 import AdminCustomers from "@/pages/admin/customers";
+import { AdminNewsletterPage } from "@/pages/admin-newsletter";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import SizeGuide from "@/pages/size-guide";
@@ -117,6 +118,7 @@ function Router() {
           <Route path="/admin/banners" component={AdminBanners} />
           <Route path="/admin/analytics" component={AdminAnalytics} />
           <Route path="/admin/customers" component={AdminCustomers} />
+          <Route path="/admin/newsletter" component={AdminNewsletterPage} />
           <Route path="/about" component={About} />
           <Route path="/contact" component={Contact} />
           <Route path="/size-guide" component={SizeGuide} />

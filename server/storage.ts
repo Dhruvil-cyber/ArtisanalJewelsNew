@@ -679,6 +679,29 @@ export class DatabaseStorage implements IStorage {
       lastOrder: lastOrderResult[0]?.createdAt || null
     };
   }
+
+  // Newsletter operations
+  async getNewsletterSubscribers(): Promise<Newsletter[]> {
+    return await db
+      .select()
+      .from(newsletter)
+      .where(eq(newsletter.isActive, true))
+      .orderBy(desc(newsletter.subscribedAt));
+  }
+
+  async createNewsletter(data: InsertNewsletter): Promise<Newsletter> {
+    const [created] = await db.insert(newsletter).values(data).returning();
+    return created;
+  }
+
+  async updateNewsletterSubscription(id: number, data: Partial<InsertNewsletter>): Promise<Newsletter> {
+    const [updated] = await db
+      .update(newsletter)
+      .set(data)
+      .where(eq(newsletter.id, id))
+      .returning();
+    return updated;
+  }
 }
 
 export const storage = new DatabaseStorage();

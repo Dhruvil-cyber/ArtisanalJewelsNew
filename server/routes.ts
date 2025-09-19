@@ -15,7 +15,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
   }
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2024-06-20",
+    apiVersion: "2025-08-27.basil",
   });
 
   // Auth routes
@@ -756,6 +756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { db } = await import("./db");
       const { newsletter } = await import("@shared/schema");
       const { eq } = await import("drizzle-orm");
+      const { sendWelcomeEmail } = await import("./sendgrid");
       
       const [existingSubscription] = await db.select().from(newsletter).where(eq(newsletter.email, email));
       
@@ -772,6 +773,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               unsubscribedAt: null 
             })
             .where(eq(newsletter.id, existingSubscription.id));
+
+          // Send welcome email for reactivated subscription
+          await sendWelcomeEmail(email, firstName || existingSubscription.firstName);
           
           return res.json({ message: "Newsletter subscription reactivated successfully" });
         }
@@ -785,10 +789,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isActive: true,
       });
 
+      // Send welcome email to new subscriber
+      await sendWelcomeEmail(email, firstName);
+
       res.json({ message: "Successfully subscribed to newsletter" });
     } catch (error) {
       console.error("Newsletter subscription error:", error);
       res.status(500).json({ message: "Failed to subscribe to newsletter" });
+    }
+  });
+
+  // Unsubscribe from newsletter
+  app.post('/api/newsletter/unsubscribe', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email || !email.includes("@")) {
+        return res.status(400).json({ message: "Valid email address is required" });
+      }
+
+      const { db } = await import("./db");
+      const { newsletter } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+
+      // Update subscription to inactive
+      const [updated] = await db.update(newsletter)
+        .set({ 
+          isActive: false, 
+          unsubscribedAt: new Date()
+        })
+        .where(eq(newsletter.email, email))
+        .returning();
+
+      if (!updated) {
+        return res.status(404).json({ message: "Email not found in our newsletter list" });
+      }
+
+      res.json({ message: "Successfully unsubscribed from newsletter" });
+    } catch (error) {
+      console.error("Newsletter unsubscribe error:", error);
+      res.status(500).json({ message: "Failed to unsubscribe from newsletter" });
+    }
+  });
+
+  // Send newsletter to all subscribers (admin only)
+  app.post('/api/admin/newsletter/send', requireAuth, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      
+      // Check if user has admin role
+      const user = await storage.getUser(authReq.user!.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { subject, title, message, includeProducts, includePromotions } = req.body;
+      
+      if (!subject || !title || !message) {
+        return res.status(400).json({ message: "Subject, title, and message are required" });
+      }
+
+      const { sendNewsletterUpdate } = await import("./sendgrid");
+      
+      // Get all active subscribers
+      const subscribers = await storage.getNewsletterSubscribers();
+      
+      if (subscribers.length === 0) {
+        return res.json({ message: "No active subscribers found", sent: 0 });
+      }
+
+      // Prepare newsletter content
+      let products: any[] = [];
+      let promotions: any[] = [];
+
+      if (includeProducts) {
+        // Get featured products for the newsletter
+        products = await storage.getProducts({ featured: true, limit: 4 });
+      }
+
+      if (includePromotions) {
+        // Get active banners as promotions
+        const banners = await storage.getActiveBanners();
+        promotions = banners.map(banner => ({
+          title: banner.title,
+          description: banner.description || "Special offer available now!"
+        }));
+      }
+
+      const newsletterContent = {
+        title,
+        message,
+        products: products.length > 0 ? products : undefined,
+        promotions: promotions.length > 0 ? promotions : undefined
+      };
+
+      // Send emails to all subscribers
+      let sentCount = 0;
+      let failedCount = 0;
+      let lastError = null;
+
+      for (const subscriber of subscribers) {
+        try {
+          const success = await sendNewsletterUpdate(
+            subscriber.email,
+            subscriber.firstName,
+            subject,
+            newsletterContent
+          );
+          
+          if (success) {
+            sentCount++;
+          } else {
+            failedCount++;
+          }
+        } catch (error) {
+          console.error(`Failed to send newsletter to ${subscriber.email}:`, error);
+          failedCount++;
+          lastError = error;
+        }
+      }
+
+      // If all emails failed, return error status
+      if (sentCount === 0 && failedCount > 0) {
+        return res.status(500).json({
+          message: "Failed to send newsletter - email service error",
+          error: lastError?.message || "Unknown email service error",
+          sent: sentCount,
+          failed: failedCount,
+          totalSubscribers: subscribers.length
+        });
+      }
+
+      res.json({ 
+        message: sentCount > 0 ? "Newsletter sending completed" : "Newsletter partially sent",
+        sent: sentCount,
+        failed: failedCount,
+        totalSubscribers: subscribers.length,
+        warning: failedCount > 0 ? "Some emails failed to send - check email service configuration" : null
+      });
+    } catch (error) {
+      console.error("Newsletter send error:", error);
+      res.status(500).json({ message: "Failed to send newsletter" });
+    }
+  });
+
+  // Get newsletter subscribers (admin only)
+  app.get('/api/admin/newsletter/subscribers', requireAuth, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      
+      // Check if user has admin role
+      const user = await storage.getUser(authReq.user!.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const subscribers = await storage.getNewsletterSubscribers();
+      res.json(subscribers);
+    } catch (error) {
+      console.error("Newsletter subscribers error:", error);
+      res.status(500).json({ message: "Failed to fetch newsletter subscribers" });
     }
   });
 

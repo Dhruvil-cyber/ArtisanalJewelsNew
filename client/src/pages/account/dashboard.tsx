@@ -95,9 +95,11 @@ export default function AccountDashboard() {
               <div className="text-2xl font-bold" data-testid="text-orders-count">{orders.length}</div>
               <p className="text-xs text-muted-foreground">Total orders placed</p>
               {orders.length > 0 && (
-                <Button variant="outline" size="sm" className="mt-4" data-testid="button-view-orders">
-                  View All Orders
-                </Button>
+                <Link href="/account/order-history">
+                  <Button variant="outline" size="sm" className="mt-4" data-testid="button-view-orders">
+                    View All Orders
+                  </Button>
+                </Link>
               )}
             </CardContent>
           </Card>

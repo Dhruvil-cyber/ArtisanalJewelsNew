@@ -18,6 +18,7 @@ import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import Wishlist from "@/pages/wishlist";
 import AccountDashboard from "@/pages/account/dashboard";
+import OrderHistory from "@/pages/account/order-history";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminProducts from "@/pages/admin/products";
 import AdminBanners from "@/pages/admin/banners";
@@ -112,6 +113,8 @@ function Router() {
           <Route path="/checkout" component={Checkout} />
           <Route path="/wishlist" component={Wishlist} />
           <Route path="/account" component={AccountDashboard} />
+          <Route path="/account/dashboard" component={AccountDashboard} />
+          <Route path="/account/order-history" component={OrderHistory} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/products" component={AdminProducts} />

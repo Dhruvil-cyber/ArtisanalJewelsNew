@@ -368,12 +368,14 @@ export default function ProductDetail() {
         </div>
 
         {/* Reviews Section */}
-        {product.reviews && product.reviews.length > 0 && (
-          <div className="mt-16">
-            <div className="flex items-center space-x-4 mb-8">
-              <h2 className="font-serif font-bold text-2xl text-foreground">Customer Reviews</h2>
+        <div className="mt-16">
+          <div className="flex items-center space-x-4 mb-8">
+            <h2 className="font-serif font-bold text-2xl text-foreground" data-testid="text-reviews-title">
+              Customer Reviews
+            </h2>
+            {product.reviews && product.reviews.length > 0 && (
               <div className="flex items-center space-x-2">
-                <div className="flex text-yellow-400">
+                <div className="flex text-yellow-400" data-testid="stars-average-rating">
                   {[...Array(5)].map((_, i) => (
                     <Star 
                       key={i} 
@@ -382,18 +384,20 @@ export default function ProductDetail() {
                     />
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-muted-foreground" data-testid="text-review-summary">
                   {calculateAverageRating().toFixed(1)} ({product.reviews.length} reviews)
                 </span>
               </div>
-            </div>
+            )}
+          </div>
 
-            <div className="space-y-6">
-              {product.reviews.slice(0, 3).map((review) => (
-                <div key={review.id} className="bg-card rounded-lg p-6 border border-border">
+          {product.reviews && product.reviews.length > 0 ? (
+            <div className="space-y-6" data-testid="container-reviews-list">
+              {product.reviews.map((review) => (
+                <div key={review.id} className="bg-card rounded-lg p-6 border border-border" data-testid={`card-review-${review.id}`}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-2">
-                      <div className="flex text-yellow-400">
+                      <div className="flex text-yellow-400" data-testid={`stars-review-${review.id}`}>
                         {[...Array(5)].map((_, i) => (
                           <Star 
                             key={i} 
@@ -402,21 +406,36 @@ export default function ProductDetail() {
                           />
                         ))}
                       </div>
-                      <span className="font-semibold text-foreground">{review.customerName}</span>
+                      <span className="font-semibold text-foreground" data-testid={`text-reviewer-name-${review.id}`}>
+                        {review.customerName}
+                      </span>
                       {review.isVerified && (
-                        <Badge variant="secondary" className="text-xs">Verified</Badge>
+                        <Badge variant="secondary" className="text-xs" data-testid={`badge-verified-${review.id}`}>
+                          Verified
+                        </Badge>
                       )}
                     </div>
                   </div>
                   {review.title && (
-                    <h4 className="font-semibold text-foreground mb-2">{review.title}</h4>
+                    <h4 className="font-semibold text-foreground mb-2" data-testid={`text-review-title-${review.id}`}>
+                      {review.title}
+                    </h4>
                   )}
-                  <p className="text-muted-foreground">{review.comment}</p>
+                  <p className="text-muted-foreground" data-testid={`text-review-comment-${review.id}`}>
+                    {review.comment}
+                  </p>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="text-center py-12" data-testid="container-no-reviews">
+              <p className="text-muted-foreground text-lg mb-4">No reviews yet</p>
+              <p className="text-sm text-muted-foreground">
+                Be the first to review this product and help other customers make their decision.
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Related Products Section */}
         <RelatedProducts currentProduct={product} />

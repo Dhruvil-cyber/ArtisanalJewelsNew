@@ -635,6 +635,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin review management
+  app.get("/api/admin/reviews", async (req, res) => {
+    try {
+      // For now, allow all requests - TODO: Add proper admin authentication
+      const result = await db
+        .select({
+          id: reviews.id,
+          productId: reviews.productId,
+          userId: reviews.userId,
+          customerName: reviews.customerName,
+          rating: reviews.rating,
+          title: reviews.title,
+          comment: reviews.comment,
+          isApproved: reviews.isApproved,
+          createdAt: reviews.createdAt,
+        })
+        .from(reviews)
+        .orderBy(reviews.createdAt);
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching admin reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
   app.put("/api/admin/orders/:id/status", async (req, res) => {
     try {
       // For now, allow all requests - TODO: Add proper admin authentication

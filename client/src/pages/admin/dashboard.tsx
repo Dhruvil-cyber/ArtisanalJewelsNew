@@ -278,6 +278,12 @@ export default function AdminDashboard() {
                   Manage Orders
                 </Button>
               </Link>
+              <Link href="/admin/reviews">
+                <Button className="w-full justify-start" variant="outline" data-testid="button-reviews">
+                  <MessageSquare size={16} className="mr-2" />
+                  Review Management
+                </Button>
+              </Link>
               <Link href="/admin/analytics">
                 <Button className="w-full justify-start" variant="outline" data-testid="button-analytics">
                   <BarChart3 size={16} className="mr-2" />

@@ -602,6 +602,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin review approval
+  // Get approved reviews for testimonials
+  app.get("/api/reviews/approved", async (req, res) => {
+    try {
+      const result = await db
+        .select({
+          id: reviews.id,
+          customerName: reviews.customerName,
+          rating: reviews.rating,
+          title: reviews.title,
+          comment: reviews.comment,
+          isApproved: reviews.isApproved,
+        })
+        .from(reviews)
+        .where(eq(reviews.isApproved, true))
+        .orderBy(reviews.createdAt);
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching approved reviews:", error);
+      res.status(500).json({ message: "Failed to fetch approved reviews" });
+    }
+  });
+
   app.put("/api/admin/reviews/:id/approve", async (req, res) => {
     try {
       // For now, allow all requests - TODO: Add proper admin authentication

@@ -10,6 +10,7 @@ import { NewsletterSignup } from "@/components/newsletter-signup";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, Shield, Truck, RotateCcw, Star, Check } from "lucide-react";
+import { CustomerTestimonials } from "@/components/customer-testimonials";
 import type { Product, Banner } from "@shared/schema";
 
 export default function Landing() {
@@ -383,60 +384,8 @@ export default function Landing() {
               ))}
             </div>
             
-            {/* Customer Testimonials */}
-            <div className="text-center mb-12">
-              <h2 className="font-serif font-bold text-3xl sm:text-4xl text-foreground mb-4">
-                What Our Customers Say
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Hear from customers who have experienced the quality and beauty of our jewelry.
-              </p>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  rating: 5,
-                  comment: "The engagement ring I purchased exceeded all expectations. The craftsmanship is incredible and the customer service was outstanding throughout the entire process.",
-                  name: "Sarah M.",
-                  verified: true
-                },
-                {
-                  rating: 5,
-                  comment: "I've been a customer for over 5 years and every piece I've purchased has been perfect. The quality is unmatched and the designs are timeless.",
-                  name: "James R.",
-                  verified: true
-                },
-                {
-                  rating: 5,
-                  comment: "The custom necklace they created for my anniversary was absolutely stunning. They brought my vision to life perfectly and the delivery was right on time.",
-                  name: "Maria L.",
-                  verified: true
-                }
-              ].map((testimonial, index) => (
-                <div key={index} className="bg-card rounded-lg p-6 shadow-md border border-border">
-                  <div className="flex text-yellow-400 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} size={16} fill="currentColor" />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground mb-4">
-                    "{testimonial.comment}"
-                  </p>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-semibold">
-                      {testimonial.name.charAt(0)}
-                    </div>
-                    <div>
-                      <h5 className="font-semibold text-foreground">{testimonial.name}</h5>
-                      <p className="text-sm text-muted-foreground">
-                        {testimonial.verified ? "Verified Customer" : "Customer"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Customer Testimonials - Real Reviews */}
+            <CustomerTestimonials />
           </div>
         </section>
 

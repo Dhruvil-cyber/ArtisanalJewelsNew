@@ -19,6 +19,7 @@ import Checkout from "@/pages/checkout";
 import Wishlist from "@/pages/wishlist";
 import AccountDashboard from "@/pages/account/dashboard";
 import OrderHistory from "@/pages/account/order-history";
+import OrderDetail from "@/pages/account/order-detail";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminProducts from "@/pages/admin/products";
 import AdminBanners from "@/pages/admin/banners";
@@ -115,6 +116,7 @@ function Router() {
           <Route path="/account" component={AccountDashboard} />
           <Route path="/account/dashboard" component={AccountDashboard} />
           <Route path="/account/order-history" component={OrderHistory} />
+          <Route path="/orders/:id" component={OrderDetail} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/products" component={AdminProducts} />

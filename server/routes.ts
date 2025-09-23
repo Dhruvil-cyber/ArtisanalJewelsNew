@@ -623,6 +623,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin order management
+  app.get("/api/admin/orders", async (req, res) => {
+    try {
+      // For now, allow all requests - TODO: Add proper admin authentication
+      const orders = await storage.getOrders(); // Get all orders for admin
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching admin orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.put("/api/admin/orders/:id/status", async (req, res) => {
+    try {
+      // For now, allow all requests - TODO: Add proper admin authentication
+      const orderId = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (isNaN(orderId)) {
+        return res.status(400).json({ message: "Invalid order ID" });
+      }
+
+      if (!status || !["pending", "confirmed", "shipped", "delivered", "cancelled"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be one of: pending, confirmed, shipped, delivered, cancelled" });
+      }
+
+      const order = await storage.updateOrderStatus(orderId, status);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      res.json(order);
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
   app.post("/api/admin/categories", async (req, res) => {
     try {
       // For now, allow all requests - TODO: Add proper admin authentication

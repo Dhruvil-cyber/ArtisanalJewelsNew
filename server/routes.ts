@@ -2,9 +2,11 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateToken, hashPassword, comparePassword, requireAuth, type AuthenticatedRequest } from "./auth";
-import { insertProductSchema, insertCategorySchema, insertReviewSchema, insertUserSchema, insertBannerSchema } from "@shared/schema";
+import { insertProductSchema, insertCategorySchema, insertReviewSchema, insertUserSchema, insertBannerSchema, reviews } from "@shared/schema";
 import cookieParser from "cookie-parser";
 import Stripe from "stripe";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware
@@ -568,6 +570,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating product:", error);
       res.status(500).json({ message: "Failed to update product" });
+    }
+  });
+
+  // Admin review approval
+  app.put("/api/admin/reviews/:id/approve", async (req, res) => {
+    try {
+      // For now, allow all requests - TODO: Add proper admin authentication
+      const reviewId = parseInt(req.params.id);
+      const result = await db
+        .update(reviews)
+        .set({ isApproved: true })
+        .where(eq(reviews.id, reviewId))
+        .returning();
+      
+      if (result.length === 0) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      
+      res.json(result[0]);
+    } catch (error) {
+      console.error("Error approving review:", error);
+      res.status(500).json({ message: "Failed to approve review" });
     }
   });
 

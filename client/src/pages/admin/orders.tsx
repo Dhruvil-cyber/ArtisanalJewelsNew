@@ -55,7 +55,9 @@ export default function AdminOrders() {
         title: "Order Status Updated",
         description: `Order #${variables.orderId} status changed to ${variables.status}`,
       });
+      // Invalidate both admin and customer caches
       queryClient.invalidateQueries({ queryKey: ["/api/admin/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
     },
     onError: (error: any) => {
       toast({

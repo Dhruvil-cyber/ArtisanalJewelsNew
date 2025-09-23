@@ -119,9 +119,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   const images = Array.isArray(product.images) ? product.images : [];
   const mainImage = images.length > 0 ? images[0] : null;
 
-  // Mock review data for display purposes
-  const averageRating = 4.8;
-  const reviewCount = 127;
+  // Use real review data from API
+  const averageRating = (product as any).averageRating || 0;
+  const reviewCount = (product as any).reviewCount || 0;
 
   return (
     <Card className="card-hover bg-card overflow-hidden shadow-md border border-border group">
@@ -207,20 +207,22 @@ export default function ProductCard({ product }: ProductCardProps) {
               </span>
             )}
           </div>
-          <div className="flex items-center space-x-1">
-            <div className="flex text-yellow-400">
-              {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  size={12} 
-                  fill={i < Math.floor(averageRating) ? "currentColor" : "none"}
-                />
-              ))}
+          {reviewCount > 0 && (
+            <div className="flex items-center space-x-1">
+              <div className="flex text-yellow-400">
+                {[...Array(5)].map((_, i) => (
+                  <Star 
+                    key={i} 
+                    size={12} 
+                    fill={i < Math.floor(averageRating) ? "currentColor" : "none"}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground" data-testid={`text-reviews-${product.id}`}>
+                ({reviewCount})
+              </span>
             </div>
-            <span className="text-xs text-muted-foreground" data-testid={`text-reviews-${product.id}`}>
-              ({reviewCount})
-            </span>
-          </div>
+          )}
         </div>
 
         <Button

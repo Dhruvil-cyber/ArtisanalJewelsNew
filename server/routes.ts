@@ -6,7 +6,7 @@ import { insertProductSchema, insertCategorySchema, insertReviewSchema, insertUs
 import cookieParser from "cookie-parser";
 import Stripe from "stripe";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware
@@ -157,7 +157,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const products = await storage.getProducts(filters);
-      res.json(products);
+      
+      // Add review statistics to each product
+      const productsWithReviews = await Promise.all(
+        products.map(async (product) => {
+          const productReviews = await db
+            .select()
+            .from(reviews)
+            .where(and(eq(reviews.productId, product.id), eq(reviews.isApproved, true)));
+          
+          const reviewCount = productReviews.length;
+          let averageRating = 0;
+          
+          if (reviewCount > 0) {
+            const totalRating = productReviews.reduce((sum, review) => sum + review.rating, 0);
+            averageRating = totalRating / reviewCount;
+          }
+          
+          return {
+            ...product,
+            reviewCount,
+            averageRating: Math.round(averageRating * 10) / 10 // Round to 1 decimal place
+          };
+        })
+      );
+      
+      res.json(productsWithReviews);
     } catch (error) {
       console.error("Error fetching products:", error);
       res.status(500).json({ message: "Failed to fetch products" });

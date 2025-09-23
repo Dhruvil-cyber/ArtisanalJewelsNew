@@ -16,9 +16,10 @@ import type { Product } from "@shared/schema";
 
 interface ProductCardProps {
   product: Product;
+  showActions?: boolean; // Control whether to show wishlist and cart buttons
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, showActions = true }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -140,20 +141,22 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
           
-          <div className="absolute top-2 right-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleWishlistToggle}
-              disabled={addToWishlistMutation.isPending}
-              className={`w-8 h-8 bg-white/90 rounded-full flex items-center justify-center transition-colors ${
-                isWishlisted ? "text-accent" : "text-muted-foreground hover:text-accent"
-              }`}
-              data-testid={`button-wishlist-${product.id}`}
-            >
-              <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
-            </Button>
-          </div>
+          {showActions && (
+            <div className="absolute top-2 right-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleWishlistToggle}
+                disabled={addToWishlistMutation.isPending}
+                className={`w-8 h-8 bg-white/90 rounded-full flex items-center justify-center transition-colors ${
+                  isWishlisted ? "text-accent" : "text-muted-foreground hover:text-accent"
+                }`}
+                data-testid={`button-wishlist-${product.id}`}
+              >
+                <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
+              </Button>
+            </div>
+          )}
           
           {product.isFeatured && (
             <div className="absolute bottom-2 left-2">
@@ -225,16 +228,18 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
-        <Button
-          onClick={handleAddToCart}
-          disabled={product.stock === 0 || addToCartMutation.isPending}
-          className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
-          size="sm"
-          data-testid={`button-add-to-cart-${product.id}`}
-        >
-          <ShoppingBag size={16} className="mr-2" />
-          {product.stock === 0 ? "Out of Stock" : addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
-        </Button>
+        {showActions && (
+          <Button
+            onClick={handleAddToCart}
+            disabled={product.stock === 0 || addToCartMutation.isPending}
+            className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+            size="sm"
+            data-testid={`button-add-to-cart-${product.id}`}
+          >
+            <ShoppingBag size={16} className="mr-2" />
+            {product.stock === 0 ? "Out of Stock" : addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

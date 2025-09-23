@@ -273,7 +273,7 @@ export default function Landing() {
                   ))}
                 </div>
               ) : (
-                <ProductGrid products={featuredProducts} />
+                <ProductGrid products={featuredProducts} showActions={false} />
               )}
               
               <div className="text-center mt-12">

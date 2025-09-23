@@ -38,10 +38,17 @@ export default function AdminOrders() {
   // Update order status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
-      return apiRequest(`/api/admin/orders/${orderId}/status`, {
+      const response = await fetch(`/api/admin/orders/${orderId}/status`, {
         method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ status }),
       });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update status");
+      }
+      return response.json();
     },
     onSuccess: (data, variables) => {
       toast({
@@ -250,8 +257,8 @@ export default function AdminOrders() {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Badge variant={getStatusColor(order.status)} data-testid={`order-status-${order.id}`}>
-                          {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                        <Badge variant={getStatusColor(order.status || "pending")} data-testid={`order-status-${order.id}`}>
+                          {(order.status || "pending").charAt(0).toUpperCase() + (order.status || "pending").slice(1)}
                         </Badge>
                         <span className="font-semibold text-lg">
                           {formatPrice(parseFloat(order.total || "0"), order.currency || "USD")}
@@ -267,8 +274,8 @@ export default function AdminOrders() {
                         <div className="space-y-2">
                           {items.slice(0, 3).map((item, index) => (
                             <div key={index} className="text-sm flex justify-between">
-                              <span className="truncate pr-2">{item.title}</span>
-                              <span className="text-muted-foreground">×{item.quantity}</span>
+                              <span className="truncate pr-2">{item.title || "Unknown Item"}</span>
+                              <span className="text-muted-foreground">×{item.quantity || 1}</span>
                             </div>
                           ))}
                           {items.length > 3 && (
@@ -283,9 +290,9 @@ export default function AdminOrders() {
                       <div>
                         <h4 className="font-medium mb-2">Shipping Address</h4>
                         <div className="text-sm text-muted-foreground space-y-1">
-                          <p>{shippingAddress.fullName}</p>
-                          <p>{shippingAddress.city}, {shippingAddress.state}</p>
-                          <p>{shippingAddress.country}</p>
+                          <p>{shippingAddress?.fullName || "N/A"}</p>
+                          <p>{shippingAddress?.city && shippingAddress?.state ? `${shippingAddress.city}, ${shippingAddress.state}` : "N/A"}</p>
+                          <p>{shippingAddress?.country || "N/A"}</p>
                         </div>
                       </div>
 
@@ -294,7 +301,7 @@ export default function AdminOrders() {
                         <div>
                           <label className="text-sm font-medium mb-2 block">Update Status</label>
                           <Select 
-                            value={order.status} 
+                            value={order.status || "pending"} 
                             onValueChange={(value) => handleStatusChange(order.id, value)}
                             disabled={updateStatusMutation.isPending}
                           >

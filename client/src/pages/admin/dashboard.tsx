@@ -272,6 +272,12 @@ export default function AdminDashboard() {
                   Manage Products
                 </Button>
               </Link>
+              <Link href="/admin/orders">
+                <Button className="w-full justify-start" variant="outline" data-testid="button-orders">
+                  <TrendingUp size={16} className="mr-2" />
+                  Manage Orders
+                </Button>
+              </Link>
               <Link href="/admin/analytics">
                 <Button className="w-full justify-start" variant="outline" data-testid="button-analytics">
                   <BarChart3 size={16} className="mr-2" />

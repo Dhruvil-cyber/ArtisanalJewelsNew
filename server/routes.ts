@@ -104,6 +104,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect('/login');
   });
 
+  // Redirect /api/auth/login GET requests to login page
+  app.get('/api/auth/login', (req, res) => {
+    res.redirect('/login');
+  });
+
   // Handle both GET and POST logout for compatibility
   app.get('/api/logout', (req, res) => {
     res.clearCookie('authToken');

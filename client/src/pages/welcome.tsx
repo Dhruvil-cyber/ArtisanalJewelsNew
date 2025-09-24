@@ -15,7 +15,8 @@ export default function Welcome() {
 
   // Fetch banners for the hero section
   const { data: banners = [] } = useQuery<Banner[]>({
-    queryKey: ["/api/banners", { active: true }],
+    queryKey: ["/api/banners"],
+    queryFn: () => fetch("/api/banners").then(res => res.json()),
   });
 
   return (

@@ -14,13 +14,6 @@ export function CustomerTestimonials() {
   // Fetch approved reviews for testimonials
   const { data: reviews = [] } = useQuery<Review[]>({
     queryKey: ["/api/reviews/approved"],
-    queryFn: async () => {
-      const response = await fetch("/api/reviews/approved");
-      if (!response.ok) {
-        throw new Error("Failed to fetch reviews");
-      }
-      return response.json();
-    },
   });
 
   // Filter for approved reviews with comments and show max 3

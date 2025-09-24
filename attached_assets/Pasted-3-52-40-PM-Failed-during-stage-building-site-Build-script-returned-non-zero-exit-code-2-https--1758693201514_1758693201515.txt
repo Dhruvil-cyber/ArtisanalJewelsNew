@@ -1,0 +1,52 @@
+3:52:40 PM: Failed during stage 'building site': Build script returned non-zero exit code: 2 (https://ntl.fyi/exit-code-2)
+3:52:40 PM: Netlify Build                                                 
+3:52:40 PM: ────────────────────────────────────────────────────────────────
+3:52:40 PM: ​
+3:52:40 PM: ❯ Version
+3:52:40 PM:   @netlify/build 35.1.6
+3:52:40 PM: ​
+3:52:40 PM: ❯ Flags
+3:52:40 PM:   accountId: 68d382524d360df2f130ef7e
+3:52:40 PM:   baseRelDir: true
+3:52:40 PM:   buildId: 68d387114d360d020530edec
+3:52:40 PM:   deployId: 68d387114d360d020530edee
+3:52:40 PM: ​
+3:52:40 PM: ❯ Current directory
+3:52:40 PM:   /opt/build/repo
+3:52:40 PM: ​
+3:52:40 PM: ❯ Config file
+3:52:40 PM:   No config file was defined: using default values.
+3:52:40 PM: ​
+3:52:40 PM: ❯ Context
+3:52:40 PM:   production
+3:52:40 PM: ​
+3:52:40 PM: Build command from Netlify app                                
+3:52:40 PM: ────────────────────────────────────────────────────────────────
+3:52:40 PM: ​
+3:52:40 PM: $ cd client && npm run build
+3:52:40 PM: > rest-express@1.0.0 build
+3:52:40 PM: > esbuild index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+3:52:40 PM: ✘ [ERROR] The entry point "index.ts" cannot be marked as external
+3:52:40 PM: 1 error
+3:52:40 PM: ​
+3:52:40 PM: "build.command" failed                                        
+3:52:40 PM: ────────────────────────────────────────────────────────────────
+3:52:40 PM: ​
+3:52:40 PM:   Error message
+3:52:40 PM:   Command failed with exit code 1: cd client && npm run build (https://ntl.fyi/exit-code-1)
+3:52:40 PM: ​
+3:52:40 PM:   Error location
+3:52:40 PM:   In Build command from Netlify app:
+3:52:40 PM:   cd client && npm run build
+3:52:40 PM: ​
+3:52:40 PM:   Resolved config
+3:52:40 PM:   build:
+3:52:40 PM:     command: cd client && npm run build
+3:52:40 PM:     commandOrigin: ui
+3:52:40 PM:     environment:
+3:52:40 PM:       - VITE_API_URL
+3:52:40 PM:     publish: /opt/build/repo/client/dist
+3:52:40 PM:     publishOrigin: ui
+3:52:40 PM: Build failed due to a user error: Build script returned non-zero exit code: 2
+3:52:40 PM: Failing build: Failed to build site
+3:52:41 PM: Finished processing build request in 12.121s

@@ -11,7 +11,10 @@ app.set('trust proxy', 1);
 // CORS configuration for production deployment
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://artisanal-jewels-52y7.vercel.app'] 
+    ? [
+        'https://artisanal-jewels-52y7.vercel.app',
+        'https://68d39312-sensational-kleicha-8c506a.netlify.app'
+      ] 
     : true, // Allow all origins in development
   credentials: true, // Allow cookies and auth headers
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

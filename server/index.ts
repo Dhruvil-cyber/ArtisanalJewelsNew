@@ -1,8 +1,25 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Trust proxy for secure cookies behind Render's proxy
+app.set('trust proxy', 1);
+
+// CORS configuration for production deployment
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://artisanal-jewels-52y7.vercel.app'] 
+    : true, // Allow all origins in development
+  credentials: true, // Allow cookies and auth headers
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-session-id']
+};
+
+app.use(cors(corsOptions));
+
 // Increase body parser limits to handle multiple image uploads (base64 encoded)
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));

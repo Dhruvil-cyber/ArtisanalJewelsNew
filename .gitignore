@@ -5,7 +5,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Production builds
-dist/
+# dist/  # Temporarily allowing dist for deployment
 build/
 server/public/
 

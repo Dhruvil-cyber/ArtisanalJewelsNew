@@ -132,11 +132,11 @@ export default function ProductCard({ product, showActions = true }: ProductCard
             <img 
               src={mainImage.url} 
               alt={mainImage.alt || product.title}
-              className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" 
+              className="w-full h-40 sm:h-48 md:h-56 lg:h-64 object-cover group-hover:scale-105 transition-transform duration-300" 
               data-testid={`img-product-${product.id}`}
             />
           ) : (
-            <div className="w-full h-64 bg-muted flex items-center justify-center">
+            <div className="w-full h-40 sm:h-48 md:h-56 lg:h-64 bg-muted flex items-center justify-center">
               <span className="text-muted-foreground">No image</span>
             </div>
           )}
@@ -187,13 +187,13 @@ export default function ProductCard({ product, showActions = true }: ProductCard
         </div>
       </Link>
       
-      <CardContent className="p-4">
+      <CardContent className="p-2 sm:p-3 lg:p-4">
         <Link href={`/product/${product.handle}`}>
           <div className="cursor-pointer">
-            <h3 className="font-medium text-foreground mb-1 line-clamp-2" data-testid={`text-title-${product.id}`}>
+            <h3 className="font-medium text-foreground mb-1 line-clamp-2 text-sm sm:text-base" data-testid={`text-title-${product.id}`}>
               {product.title}
             </h3>
-            <p className="text-sm text-muted-foreground mb-2 line-clamp-1" data-testid={`text-description-${product.id}`}>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-1" data-testid={`text-description-${product.id}`}>
               {product.shortDescription}
             </p>
           </div>
@@ -201,11 +201,11 @@ export default function ProductCard({ product, showActions = true }: ProductCard
         
         <div className="flex items-center justify-between mb-3">
           <div className="flex flex-col">
-            <span className="price-highlight font-bold text-lg" data-testid={`text-price-${product.id}`}>
+            <span className="price-highlight font-bold text-sm sm:text-base lg:text-lg" data-testid={`text-price-${product.id}`}>
               {formatPrice(product.basePrice, product.currency || undefined)}
             </span>
             {needsAlert && (
-              <span className="text-xs text-muted-foreground mt-1">
+              <span className="text-xs text-muted-foreground mt-1 hidden sm:block">
                 {stock} left in stock
               </span>
             )}

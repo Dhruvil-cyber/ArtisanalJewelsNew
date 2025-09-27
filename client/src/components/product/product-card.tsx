@@ -5,11 +5,10 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { formatPrice } from "@/lib/formatters";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { Heart, Star, ShoppingBag } from "lucide-react";
+import { Heart, Star, ShoppingBag, Eye } from "lucide-react";
 import { useProductStockStatus } from "@/hooks/use-inventory-monitoring";
 import { InventoryAlert } from "@/components/inventory-alert";
 import type { Product } from "@shared/schema";
@@ -21,6 +20,8 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, showActions = true }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -34,8 +35,9 @@ export default function ProductCard({ product, showActions = true }: ProductCard
     onSuccess: () => {
       setIsWishlisted(true);
       toast({
-        title: "Added to wishlist",
-        description: "Item has been saved to your wishlist.",
+        title: "✨ Added to wishlist",
+        description: "Item has been saved to your luxury collection.",
+        className: "border-gold-500/20 bg-background/95 backdrop-blur-sm",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/wishlist"] });
     },
@@ -44,6 +46,7 @@ export default function ProductCard({ product, showActions = true }: ProductCard
         toast({
           title: "Please log in",
           description: "You need to be logged in to add items to wishlist.",
+          variant: "destructive",
         });
         return;
       }
@@ -65,8 +68,9 @@ export default function ProductCard({ product, showActions = true }: ProductCard
     },
     onSuccess: () => {
       toast({
-        title: "Added to cart",
+        title: "🛍️ Added to cart",
         description: "Item has been added to your shopping cart.",
+        className: "border-gold-500/20 bg-background/95 backdrop-blur-sm",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     },
@@ -75,6 +79,7 @@ export default function ProductCard({ product, showActions = true }: ProductCard
         toast({
           title: "Please log in",
           description: "You need to be logged in to add items to cart.",
+          variant: "destructive",
         });
         return;
       }
@@ -94,6 +99,7 @@ export default function ProductCard({ product, showActions = true }: ProductCard
       toast({
         title: "Please log in",
         description: "You need to be logged in to add items to wishlist.",
+        variant: "destructive",
       });
       return;
     }
@@ -125,122 +131,172 @@ export default function ProductCard({ product, showActions = true }: ProductCard
   const reviewCount = (product as any).reviewCount || 0;
 
   return (
-    <Card className="card-hover bg-card overflow-hidden shadow-md border border-border group">
-      <Link href={`/product/${product.handle}`}>
-        <div className="relative cursor-pointer">
+    <div 
+      className="group relative luxury-card rounded-xl overflow-hidden transition-all duration-500 hover:-translate-y-2 cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      data-testid={`card-product-${product.id}`}
+      style={{
+        background: 'linear-gradient(135deg, hsl(0, 0%, 100%) 0%, hsl(220, 14%, 98%) 100%)',
+      }}
+    >
+      {/* Image Container */}
+      <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-muted/50 to-muted/30">
+        <Link href={`/product/${product.handle}`}>
           {mainImage ? (
             <img 
               src={mainImage.url} 
               alt={mainImage.alt || product.title}
-              className="w-full h-40 sm:h-48 md:h-56 lg:h-64 object-cover group-hover:scale-105 transition-transform duration-300" 
+              className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              loading="lazy"
+              onLoad={() => setImageLoaded(true)}
               data-testid={`img-product-${product.id}`}
             />
           ) : (
-            <div className="w-full h-40 sm:h-48 md:h-56 lg:h-64 bg-muted flex items-center justify-center">
-              <span className="text-muted-foreground">No image</span>
+            <div className="w-full h-full bg-gradient-to-br from-muted/30 to-muted/50 flex items-center justify-center">
+              <span className="text-muted-foreground font-medium">No image available</span>
             </div>
           )}
-          
-          {showActions && (
-            <div className="absolute top-2 right-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleWishlistToggle}
-                disabled={addToWishlistMutation.isPending}
-                className={`w-8 h-8 bg-white/90 rounded-full flex items-center justify-center transition-colors ${
-                  isWishlisted ? "text-accent" : "text-muted-foreground hover:text-accent"
-                }`}
-                data-testid={`button-wishlist-${product.id}`}
-              >
-                <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
-              </Button>
-            </div>
-          )}
-          
+        </Link>
+        
+        {/* Image Loading Skeleton */}
+        {!imageLoaded && mainImage && (
+          <div className="absolute inset-0 bg-gradient-to-br from-muted/30 to-muted/50 animate-pulse" />
+        )}
+        
+        {/* Image Overlay Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+        {/* Status Badges */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2">
           {product.isFeatured && (
-            <div className="absolute bottom-2 left-2">
-              <Badge className="bg-accent text-accent-foreground" data-testid={`badge-featured-${product.id}`}>
-                Bestseller
-              </Badge>
-            </div>
+            <Badge className="bg-gradient-to-r from-gold-500 to-gold-600 text-onyx text-xs font-semibold px-3 py-1 rounded-full shadow-luxury border-0" data-testid={`badge-featured-${product.id}`}>
+              ✨ Bestseller
+            </Badge>
           )}
           
           {/* Dynamic Inventory Badges */}
           {needsAlert && (
-            <div className="absolute top-2 left-2">
-              <InventoryAlert
-                alert={{
-                  id: `${product.id}-${status}`,
-                  productId: product.id,
-                  productTitle: product.title,
-                  currentStock: stock,
-                  threshold: status === "critical" ? 3 : 10,
-                  severity: status === "out" ? "out" : status === "critical" ? "critical" : "low",
-                  lastUpdated: new Date()
-                }}
-                variant="badge"
-                showAnimation={true}
-              />
-            </div>
+            <InventoryAlert
+              alert={{
+                id: `${product.id}-${status}`,
+                productId: product.id,
+                productTitle: product.title,
+                currentStock: stock,
+                threshold: status === "critical" ? 3 : 10,
+                severity: status === "out" ? "out" : status === "critical" ? "critical" : "low",
+                lastUpdated: new Date()
+              }}
+              variant="badge"
+              showAnimation={true}
+            />
           )}
         </div>
-      </Link>
-      
-      <CardContent className="p-2 sm:p-3 lg:p-4">
+
+        {/* Wishlist Button */}
+        {showActions && (
+          <button
+            onClick={handleWishlistToggle}
+            disabled={addToWishlistMutation.isPending}
+            className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur-md rounded-full shadow-luxury hover:shadow-gold-glow border border-gold-500/20 hover:border-gold-500/40 transition-all duration-300 hover:scale-110 group/wishlist"
+            data-testid={`button-wishlist-${product.id}`}
+          >
+            <Heart 
+              size={16} 
+              className={`transition-all duration-300 ${
+                isWishlisted 
+                  ? 'text-gold-600 fill-current' 
+                  : 'text-gold-600 group-hover/wishlist:text-gold-500 group-hover/wishlist:fill-current'
+              }`}
+            />
+          </button>
+        )}
+
+        {/* Quick Actions - Show on Hover */}
+        <div className="absolute bottom-4 left-4 right-4 flex gap-3 transform translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100">
+          {showActions && (
+            <button
+              onClick={handleAddToCart}
+              disabled={product.stock === 0 || addToCartMutation.isPending}
+              className="flex-1 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-onyx py-3 px-4 rounded-lg font-semibold hover:shadow-gold-glow transition-all duration-300 hover:scale-105 text-sm flex items-center justify-center gap-2"
+              data-testid={`button-add-to-cart-${product.id}`}
+            >
+              <ShoppingBag size={16} />
+              {product.stock === 0 ? "Out of Stock" : addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
+            </button>
+          )}
+          <Link href={`/product/${product.handle}`}>
+            <button 
+              className="px-4 py-3 bg-white/95 backdrop-blur-md border border-gold-500/30 hover:border-gold-500/50 rounded-lg font-semibold hover:bg-white transition-all duration-300 hover:scale-105 text-sm text-gold-600 hover:text-gold-500 flex items-center justify-center gap-2"
+              data-testid={`button-view-product-${product.id}`}
+            >
+              <Eye size={16} />
+              View
+            </button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-6">
         <Link href={`/product/${product.handle}`}>
-          <div className="cursor-pointer">
-            <h3 className="font-medium text-foreground mb-1 line-clamp-2 text-sm sm:text-base" data-testid={`text-title-${product.id}`}>
-              {product.title}
-            </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-1" data-testid={`text-description-${product.id}`}>
-              {product.shortDescription}
-            </p>
-          </div>
+          <h3 className="font-serif font-semibold text-lg text-foreground mb-3 line-clamp-2 hover:text-gold-600 transition-colors duration-300 leading-tight tracking-wide" data-testid={`text-title-${product.id}`}>
+            {product.title}
+          </h3>
         </Link>
-        
-        <div className="flex items-center justify-between mb-3">
+
+        {/* Description */}
+        {product.shortDescription && (
+          <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed" data-testid={`text-description-${product.id}`}>
+            {product.shortDescription}
+          </p>
+        )}
+
+        {/* Price and Rating Row */}
+        <div className="flex items-center justify-between mb-4">
           <div className="flex flex-col">
-            <span className="price-highlight font-bold text-sm sm:text-base lg:text-lg" data-testid={`text-price-${product.id}`}>
-              {formatPrice(product.basePrice, product.currency || undefined)}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xl font-bold text-gold-600 tracking-tight" data-testid={`text-price-${product.id}`}>
+                {formatPrice(product.basePrice, product.currency || undefined)}
+              </span>
+            </div>
             {needsAlert && (
-              <span className="text-xs text-muted-foreground mt-1 hidden sm:block">
+              <span className="text-xs text-muted-foreground mt-1">
                 {stock} left in stock
               </span>
             )}
           </div>
+
+          {/* Rating */}
           {reviewCount > 0 && (
-            <div className="flex items-center space-x-1">
-              <div className="flex text-yellow-400">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    size={12} 
-                    fill={i < Math.floor(averageRating) ? "currentColor" : "none"}
+                  <Star
+                    key={i}
+                    size={14}
+                    className={`transition-colors duration-200 ${
+                      i < Math.floor(averageRating)
+                        ? 'text-gold-500 fill-current'
+                        : 'text-muted-foreground/30'
+                    }`}
                   />
                 ))}
               </div>
-              <span className="text-xs text-muted-foreground" data-testid={`text-reviews-${product.id}`}>
+              <span className="text-xs text-muted-foreground font-medium" data-testid={`text-reviews-${product.id}`}>
                 ({reviewCount})
               </span>
             </div>
           )}
         </div>
-
-        {showActions && (
-          <Button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0 || addToCartMutation.isPending}
-            className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
-            size="sm"
-            data-testid={`button-add-to-cart-${product.id}`}
-          >
-            <ShoppingBag size={16} className="mr-2" />
-            {product.stock === 0 ? "Out of Stock" : addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+        
+        {/* Subtle Gold Accent Line */}
+        <div className="mt-4 pt-4 border-t border-gold-500/10">
+          <div className="h-0.5 w-12 bg-gradient-to-r from-gold-500 to-gold-600 rounded-full mx-auto opacity-50 group-hover:opacity-100 group-hover:w-16 transition-all duration-500"></div>
+        </div>
+      </div>
+    </div>
   );
 }

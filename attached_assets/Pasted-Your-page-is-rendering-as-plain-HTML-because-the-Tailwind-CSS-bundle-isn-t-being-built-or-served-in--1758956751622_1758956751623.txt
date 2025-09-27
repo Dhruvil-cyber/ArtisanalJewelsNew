@@ -1,0 +1,103 @@
+Your page is rendering as plain HTML because the Tailwind/CSS bundle isn’t being built or served in your Netlify deploy. That happens in one of these common situations:
+
+Netlify is building from the wrong folder (your app lives in client/, but Netlify runs at repo root).
+
+Publish directory is wrong (Netlify serves a folder that doesn’t contain the built index.html + assets).
+
+The CSS file isn’t generated/imported (no import "./index.css" or Tailwind config isn’t picked up).
+
+Cached bad build (Netlify served a previous build without CSS).
+
+Here’s how to fix it—pick the setup that matches your repo.
+
+If your frontend is in client/ (very likely)
+Netlify → Site settings → Build & deploy → Build settings
+
+Base directory: client
+
+Build command: npm run build
+
+Publish directory: dist
+
+Save, then click Trigger deploy → Clear cache and deploy site.
+
+Why this works: Netlify will cd client before running the build, so Tailwind/PostCSS run and dist/ gets the final CSS/JS.
+
+If your frontend is at the repo root (no client/ folder)
+
+Base directory: (leave blank)
+
+Build command: npm run build
+
+Publish directory: dist
+
+Redeploy with cache cleared.
+
+If you want to keep base directory blank and still build inside client/
+
+(works, but a bit noisier)
+
+Base directory: (blank)
+
+Build command: cd client && npm ci && npm run build
+
+Publish directory: client/dist
+
+Redeploy with cache cleared.
+
+Sanity checks (do these once)
+
+In client/ (or root, if no client/):
+
+src/main.tsx must import the CSS:
+
+import "./index.css";
+
+
+Tailwind/PostCSS configs exist and are committed:
+tailwind.config.cjs
+
+module.exports = {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: { extend: {} },
+  plugins: [],
+};
+
+
+postcss.config.cjs
+
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+
+
+src/index.css
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+No dist/ in Publish dir unless it was built. If you publish a folder that has only a bare index.html (no /assets/*.css), you’ll see exactly what your screenshot shows.
+
+Quick way to confirm the root cause
+
+Open DevTools → Network tab on the Netlify site and refresh.
+If you see 404s for something like /assets/index-XXXXX.css, then Netlify is publishing the wrong folder (or the build never ran).
+
+Bonus: Vite base (only if using a subpath)
+
+If your Netlify site is deployed under a subpath (rare), set base in vite.config.ts:
+
+export default defineConfig({
+  base: "/your-subpath/",
+  // ...
+});
+
+
+For standard Netlify sites on https://<site>.netlify.app, don’t set base (default / is correct).
+
+Do the base/build/publish fix + clear cache, and your CSS will load.

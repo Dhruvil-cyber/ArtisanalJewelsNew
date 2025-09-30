@@ -20,9 +20,10 @@ function log(message: string, source = "express") {
 // Manual CORS implementation to avoid cors package dependency issues
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  const nodeEnv = process.env.NODE_ENV || 'development';
   
   // Allow all origins in development
-  if (process.env.NODE_ENV === 'development') {
+  if (nodeEnv === 'development') {
     res.setHeader('Access-Control-Allow-Origin', origin || '*');
   } 
   // In production, allow Vercel and Netlify domains for this project
@@ -94,7 +95,8 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "development") {
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  if (nodeEnv === "development") {
     // Only import vite in development - using dynamic import to avoid bundling in production
     try {
       const viteModule = await eval('import("./vite.js")');

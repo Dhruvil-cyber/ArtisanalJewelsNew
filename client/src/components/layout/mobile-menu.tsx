@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
 import { X, User, Heart, ShoppingBag, Settings } from "lucide-react";
-import { useEffect } from "react";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -13,28 +12,12 @@ interface MobileMenuProps {
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const { isAuthenticated, user } = useAuth();
 
-  // Body scroll lock when menu is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-in-out" 
-        onClick={onClose}
-      ></div>
-      <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-background shadow-2xl transform transition-all duration-300 ease-in-out animate-in slide-in-from-right">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
+      <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-background shadow-xl transform transition-transform duration-300">
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
             <span className="font-serif font-semibold text-xl text-primary">Menu</span>

@@ -88,7 +88,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
+    
     if (!isAuthenticated) {
       toast({
         title: "Please log in",
@@ -103,7 +103,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
+    
     if (product.stock === 0) {
       toast({
         title: "Out of stock",
@@ -139,7 +139,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               <span className="text-muted-foreground">No image</span>
             </div>
           )}
-
+          
           <div className="absolute top-2 right-2">
             <Button
               variant="ghost"
@@ -154,7 +154,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
             </Button>
           </div>
-
+          
           {product.isFeatured && (
             <div className="absolute bottom-2 left-2">
               <Badge className="bg-accent text-accent-foreground" data-testid={`badge-featured-${product.id}`}>
@@ -162,7 +162,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               </Badge>
             </div>
           )}
-
+          
           {/* Dynamic Inventory Badges */}
           {needsAlert && (
             <div className="absolute top-2 left-2">
@@ -183,7 +183,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
       </Link>
-
+      
       <CardContent className="p-4">
         <Link href={`/product/${product.handle}`}>
           <div className="cursor-pointer">
@@ -195,7 +195,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </p>
           </div>
         </Link>
-
+        
         <div className="flex items-center justify-between mb-3">
           <div className="flex flex-col">
             <span className="price-highlight font-bold text-lg" data-testid={`text-price-${product.id}`}>

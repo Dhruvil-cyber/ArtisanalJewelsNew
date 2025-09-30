@@ -51,7 +51,7 @@ export default function Landing() {
           >
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent"></div>
           </div>
-
+          
           <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
             <div className="max-w-2xl w-full">
               <div className="mb-3 sm:mb-4">
@@ -116,7 +116,7 @@ export default function Landing() {
               </div>
             </div>
           </div>
-
+          
           {/* Trust Indicators */}
           <div className="absolute bottom-2 sm:bottom-4 lg:bottom-8 left-1/2 transform -translate-x-1/2 w-full px-2 sm:px-4">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 lg:gap-8 text-white/70 text-center">
@@ -164,7 +164,7 @@ export default function Landing() {
                 </div>
               )}
             </div>
-
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {/* Collection Cards */}
               {[
@@ -222,7 +222,7 @@ export default function Landing() {
                 </div>
               ))}
             </div>
-
+            
             <div className="text-center mt-12">
               {isAuthenticated ? (
                 <Link href="/catalog">
@@ -259,7 +259,7 @@ export default function Landing() {
                   Our most loved pieces, chosen by discerning customers worldwide.
                 </p>
               </div>
-
+              
               {isLoading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[...Array(4)].map((_, i) => (
@@ -273,7 +273,7 @@ export default function Landing() {
               ) : (
                 <ProductGrid products={featuredProducts} showActions={false} />
               )}
-
+              
               <div className="text-center mt-12">
                 <Link href="/catalog">
                   <Button 
@@ -299,7 +299,7 @@ export default function Landing() {
                 <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
                   Each piece in our collection is meticulously handcrafted by skilled artisans who have dedicated their lives to perfecting their craft. Using time-honored techniques passed down through generations, we create jewelry that tells a story of excellence and passion.
                 </p>
-
+                
                 <div className="space-y-4 mb-8">
                   {[
                     {
@@ -326,7 +326,7 @@ export default function Landing() {
                     </div>
                   ))}
                 </div>
-
+                
                 <Button 
                   className="bg-accent hover:bg-accent/90 text-accent-foreground px-8 py-3 font-semibold"
                   data-testid="button-learn-process"
@@ -334,7 +334,7 @@ export default function Landing() {
                   Learn About Our Process
                 </Button>
               </div>
-
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <img 
                   src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
@@ -381,7 +381,7 @@ export default function Landing() {
                 </div>
               ))}
             </div>
-
+            
             {/* Customer Testimonials - Real Reviews */}
             <CustomerTestimonials />
           </div>
@@ -397,7 +397,7 @@ export default function Landing() {
               <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
                 Be the first to discover new collections, exclusive offers, and jewelry care tips from our master craftsmen.
               </p>
-
+              
               <div className="max-w-md mx-auto">
                 <NewsletterSignup variant="inline" className="flex-1" />
                 <p className="text-sm text-gray-300 mt-3">

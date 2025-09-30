@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useInventoryMonitoring } from "@/hooks/use-inventory-monitoring";
 import { InventoryAlertList } from "@/components/inventory-alert";
-import AppLayout from "@/components/layout/app-layout";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Landing from "@/pages/landing";
@@ -69,7 +68,7 @@ function Router() {
   }
 
   return (
-    <AppLayout>
+    <>
       {/* Global Inventory Alerts */}
       {isAuthenticated && alerts.length > 0 && (
         <InventoryAlertList
@@ -125,6 +124,7 @@ function Router() {
           <Route path="/admin/products" component={AdminProducts} />
           <Route path="/admin/banners" component={AdminBanners} />
           <Route path="/admin/analytics" component={AdminAnalytics} />
+          <Route path="/admin/customers" component={AdminCustomers} />
           <Route path="/admin/orders" component={AdminOrders} />
           <Route path="/admin/reviews" component={AdminReviews} />
           <Route path="/admin/newsletter" component={AdminNewsletterPage} />
@@ -149,8 +149,8 @@ function Router() {
         </>
       )}
       <Route component={NotFound} />
-      </Switch>
-    </AppLayout>
+    </Switch>
+    </>
   );
 }
 

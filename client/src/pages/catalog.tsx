@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
+import MobileMenu from "@/components/layout/mobile-menu";
 import ProductGrid from "@/components/product/product-grid";
 import ProductFilters from "@/components/product/product-filters";
 import { Button } from "@/components/ui/button";
@@ -18,6 +21,7 @@ interface ProductFilters {
 }
 
 export default function Catalog() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<ProductFilters>({
     search: "",
@@ -57,7 +61,14 @@ export default function Catalog() {
   };
 
   return (
-    <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+    <div className="min-h-screen bg-background">
+      <Header onMobileMenuToggle={() => setIsMobileMenuOpen(true)} />
+      <MobileMenu
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+      />
+
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-serif font-bold text-3xl sm:text-4xl text-foreground mb-4">
@@ -166,6 +177,9 @@ export default function Catalog() {
             )}
           </div>
         </div>
-    </main>
+      </main>
+
+      <Footer />
+    </div>
   );
 }

@@ -109,7 +109,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
                 />
               </div>
             </form>
-
+            
             {/* Search Icon for mobile */}
             <Button 
               variant="ghost" 
@@ -120,7 +120,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             >
               <Search size={20} />
             </Button>
-
+            
             {/* Account */}
             {isAuthenticated ? (
               <div className="nav-item relative">
@@ -174,7 +174,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
                 </Link>
               </div>
             )}
-
+            
             {/* Wishlist */}
             <Link href="/wishlist">
               <Button 
@@ -194,7 +194,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
                 )}
               </Button>
             </Link>
-
+            
             {/* Cart */}
             <Link href="/cart">
               <Button 
@@ -227,7 +227,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             </Button>
           </div>
         </div>
-
+        
         {/* Mobile Search Bar */}
         {showMobileSearch && (
           <div className="md:hidden border-t border-border bg-background/95 px-3 py-3">

@@ -1,0 +1,320 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Swarovski-Inspired Elegant Cream Theme */
+  --background: hsl(45, 15%, 96%); /* Warm cream background like Swarovski */
+  --foreground: hsl(0, 0%, 0%);
+  --card: hsl(0, 0%, 100%); /* Pure white cards for contrast */
+  --card-foreground: hsl(0, 0%, 0%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 0%);
+  --primary: hsl(25, 45%, 65%); /* Elegant warm bronze */
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(45, 10%, 94%); /* Slightly cream tinted secondary */
+  --secondary-foreground: hsl(0, 0%, 9%);
+  --muted: hsl(45, 10%, 94%); /* Cream tinted muted */
+  --muted-foreground: hsl(0, 0%, 45%);
+  --accent: hsl(25, 45%, 65%); /* Elegant warm bronze */
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(45, 8%, 87%); /* Warm tinted borders */
+  --input: hsl(45, 8%, 87%); /* Warm tinted inputs */
+  --ring: hsl(25, 45%, 65%); /* Elegant warm bronze */
+  --chart-1: hsl(25, 45%, 65%);
+  --chart-2: hsl(0, 0%, 20%);
+  --chart-3: hsl(30, 35%, 55%);
+  --chart-4: hsl(0, 0%, 60%);
+  --chart-5: hsl(25, 30%, 45%);
+  --sidebar: hsl(45, 12%, 98%); /* Cream tinted sidebar */
+  --sidebar-foreground: hsl(0, 0%, 10%);
+  --sidebar-primary: hsl(25, 45%, 65%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(45, 20%, 95%);
+  --sidebar-accent-foreground: hsl(25, 45%, 65%);
+  --sidebar-border: hsl(45, 8%, 90%); /* Warm tinted sidebar border */
+  --sidebar-ring: hsl(25, 45%, 65%);
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-mono: "Fira Code", monospace;
+  --radius: 0.5rem;
+  
+  /* Custom luxury colors */
+  --luxury-black: hsl(0, 0%, 0%);
+  --luxury-gold: hsl(25, 45%, 65%); /* Elegant warm bronze */
+  --luxury-gold-dark: hsl(25, 40%, 55%); /* Darker bronze */
+  --luxury-white: hsl(0, 0%, 100%);
+  --luxury-cream: hsl(45, 15%, 96%); /* Updated to match background */
+  --luxury-warm-cream: hsl(45, 20%, 94%); /* Slightly warmer cream */
+  --luxury-charcoal: hsl(0, 0%, 15%);
+}
+
+.dark {
+  /* Dark Luxury Theme */
+  --background: hsl(0, 0%, 5%);
+  --foreground: hsl(0, 0%, 95%);
+  --card: hsl(0, 0%, 8%);
+  --card-foreground: hsl(0, 0%, 95%);
+  --popover: hsl(0, 0%, 8%);
+  --popover-foreground: hsl(0, 0%, 95%);
+  --primary: hsl(45, 100%, 60%); /* Brighter gold for dark theme */
+  --primary-foreground: hsl(0, 0%, 0%);
+  --secondary: hsl(0, 0%, 12%);
+  --secondary-foreground: hsl(0, 0%, 95%);
+  --muted: hsl(0, 0%, 12%);
+  --muted-foreground: hsl(0, 0%, 60%);
+  --accent: hsl(45, 100%, 60%); /* Brighter gold for dark theme */
+  --accent-foreground: hsl(0, 0%, 0%);
+  --destructive: hsl(0, 62%, 31%);
+  --destructive-foreground: hsl(0, 0%, 95%);
+  --border: hsl(0, 0%, 15%);
+  --input: hsl(0, 0%, 15%);
+  --ring: hsl(45, 100%, 60%); /* Brighter gold for dark theme */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .gradient-overlay {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(30, 41, 59, 0.4) 100%);
+  }
+  
+  /* Remove duplicates - moved to bottom of file */
+  
+  .gold-shimmer {
+    background: linear-gradient(90deg, hsl(45, 100%, 50%) 0%, hsl(45, 100%, 60%) 50%, hsl(45, 100%, 50%) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  .luxury-border {
+    border: 1px solid hsl(45, 100%, 50%);
+    box-shadow: 0 0 20px hsla(45, 100%, 50%, 0.3);
+  }
+  
+  .luxury-card {
+    background: linear-gradient(135deg, hsl(0, 0%, 100%) 0%, hsl(45, 25%, 97%) 100%);
+    border: 1px solid hsl(45, 20%, 90%);
+    box-shadow: 0 4px 20px hsla(0, 0%, 0%, 0.1);
+  }
+  
+  .luxury-text {
+    color: hsl(0, 0%, 0%);
+    text-shadow: 0 1px 2px hsla(0, 0%, 0%, 0.1);
+  }
+  
+  .gold-accent {
+    color: hsl(45, 100%, 50%);
+    font-weight: 600;
+  }
+
+  .loading-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .luxury-gradient {
+    background: linear-gradient(135deg, 
+      hsl(0, 0%, 5%) 0%, 
+      hsl(25, 15%, 15%) 25%, 
+      hsl(25, 25%, 25%) 50%, 
+      hsl(25, 35%, 35%) 75%, 
+      hsl(45, 45%, 45%) 100%);
+  }
+
+  .hero-pattern {
+    background-image: radial-gradient(circle at 25% 25%, hsla(45, 100%, 50%, 0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 75% 75%, hsla(25, 100%, 60%, 0.1) 0%, transparent 50%);
+  }
+
+  .price-highlight {
+    color: hsl(25, 45%, 65%);
+    font-weight: 700;
+  }
+
+  .card-hover {
+    transition: all 0.3s ease;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px hsla(0, 0%, 0%, 0.12);
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .nav-dropdown {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 50;
+  }
+
+  .nav-item:hover .nav-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .nav-item:hover svg {
+    transform: rotate(180deg);
+  }
+
+  /* Header responsive improvements */
+  @media (max-width: 1024px) {
+    .nav-item .nav-dropdown {
+      position: fixed;
+      top: auto;
+      left: 1rem;
+      right: 1rem;
+      width: auto;
+    }
+  }
+
+  /* Mobile responsive improvements */
+  @media (max-width: 768px) {
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    .luxury-gradient {
+      background: linear-gradient(135deg, 
+        hsl(0, 0%, 10%) 0%, 
+        hsl(25, 20%, 20%) 50%, 
+        hsl(45, 30%, 30%) 100%);
+    }
+    
+    .hero-pattern {
+      background-size: 30px 30px;
+    }
+  }
+
+  /* Button consistency */
+  .btn-primary {
+    background: hsl(45, 100%, 50%);
+    color: hsl(0, 0%, 0%);
+    border: 1px solid hsl(45, 100%, 50%);
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    background: hsl(45, 100%, 45%);
+    box-shadow: 0 4px 12px hsla(45, 100%, 50%, 0.3);
+  }
+
+  /* Form improvements */
+  .form-input:focus {
+    border-color: hsl(45, 100%, 50%);
+    box-shadow: 0 0 0 2px hsla(45, 100%, 50%, 0.2);
+  }
+
+  /* Loading states */
+  .loading-skeleton {
+    background: linear-gradient(
+      90deg,
+      hsl(0, 0%, 95%) 0%,
+      hsl(0, 0%, 90%) 50%,
+      hsl(0, 0%, 95%) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Dark mode improvements */
+  .dark .loading-skeleton {
+    background: linear-gradient(
+      90deg,
+      hsl(0, 0%, 15%) 0%,
+      hsl(0, 0%, 20%) 50%,
+      hsl(0, 0%, 15%) 100%
+    );
+  }
+}
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

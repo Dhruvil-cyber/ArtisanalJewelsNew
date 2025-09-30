@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Gem, Facebook, Instagram, Youtube } from "lucide-react";
+import { Facebook, Instagram, Youtube } from "lucide-react";
+import logoImage from "@assets/artisanal-jewels-logo.png";
 
 export default function Footer() {
   return (
@@ -9,11 +10,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Info */}
           <div className="lg:col-span-1">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                <Gem className="text-accent" size={16} />
-              </div>
-              <span className="font-serif font-semibold text-xl">Artisanal Jewels</span>
+            <div className="mb-4">
+              <img 
+                src={logoImage} 
+                alt="Artisanal Jewels" 
+                className="h-12 w-auto"
+              />
             </div>
             <p className="text-gray-300 mb-4 leading-relaxed">
               Crafting timeless jewelry pieces with passion and precision since 1985. Each creation tells a unique story of excellence and artistry.

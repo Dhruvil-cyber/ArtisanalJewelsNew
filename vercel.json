@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "vite build",
   "outputDirectory": "dist",
-  "build": {
+  "build": {pu
     "env": {
       "VITE_API_URL": "https://artisanaljewels.onrender.com"
     }

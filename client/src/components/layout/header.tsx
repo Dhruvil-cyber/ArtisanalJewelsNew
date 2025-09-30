@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
-import { Search, User, Heart, ShoppingBag, Menu, Gem, ChevronDown } from "lucide-react";
+import { Search, User, Heart, ShoppingBag, Menu, ChevronDown } from "lucide-react";
+import logoImage from "@assets/artisanal-jewels-logo.png";
 import type { CartItem } from "@shared/schema";
 
 interface HeaderProps {
@@ -47,11 +48,12 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/">
-              <div className="flex items-center space-x-1.5 sm:space-x-2" data-testid="link-home">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center">
-                  <Gem className="text-primary-foreground" size={14} />
-                </div>
-                <span className="font-serif font-semibold text-base sm:text-lg lg:text-xl text-primary">Artisanal Jewels</span>
+              <div className="flex items-center" data-testid="link-home">
+                <img 
+                  src={logoImage} 
+                  alt="Artisanal Jewels" 
+                  className="h-8 sm:h-10 lg:h-12 w-auto"
+                />
               </div>
             </Link>
           </div>

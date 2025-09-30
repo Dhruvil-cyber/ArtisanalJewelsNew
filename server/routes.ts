@@ -5,6 +5,8 @@ import { generateToken, hashPassword, comparePassword, requireAuth, type Authent
 import { insertProductSchema, insertCategorySchema, insertReviewSchema, insertUserSchema, insertBannerSchema, reviews } from "@shared/schema";
 import cookieParser from "cookie-parser";
 import Stripe from "stripe";
+import Razorpay from "razorpay";
+import crypto from "crypto";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -19,6 +21,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2025-08-27.basil",
   });
+
+  // Initialize Razorpay
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    console.warn('⚠️ Razorpay credentials not found. Razorpay payments will be disabled.');
+  }
+  const razorpay = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET
+    ? new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET,
+      })
+    : null;
 
   // Auth routes
   app.post('/api/auth/register', async (req, res) => {
@@ -477,6 +490,206 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error confirming payment:", error);
       res.status(500).json({ message: "Error confirming payment" });
+    }
+  });
+
+  // Razorpay Payment Routes
+  // Currency conversion rate: 1 AUD = 60 INR (approximate, should be updated regularly)
+  const AUD_TO_INR_RATE = 60;
+
+  app.post("/api/create-razorpay-order", requireAuth, async (req, res) => {
+    try {
+      if (!razorpay) {
+        return res.status(503).json({ message: "Razorpay is not configured" });
+      }
+
+      const authReq = req as AuthenticatedRequest;
+      const userId = authReq.user!.id;
+      const sessionId = req.headers['x-session-id'] as string;
+
+      // Fetch cart items server-side (don't trust client)
+      const cartItems = await storage.getCartItems(userId, sessionId);
+
+      if (cartItems.length === 0) {
+        return res.status(400).json({ message: "Cart is empty" });
+      }
+
+      // Calculate totals in AUD, then convert to INR
+      const subtotalAUD = cartItems.reduce((sum, item) => 
+        sum + (parseFloat(item.price || "0") * (item.quantity || 1)), 0
+      );
+      const shippingAUD = 25.00; // Base shipping in AUD
+      const totalAUD = subtotalAUD + shippingAUD;
+
+      // Convert to INR
+      const subtotalINR = subtotalAUD * AUD_TO_INR_RATE;
+      const shippingINR = 250.00; // Fixed shipping for India (roughly 25 AUD * 10, rounded for simplicity)
+      const totalINR = subtotalINR + shippingINR;
+
+      // Create Razorpay order
+      const options = {
+        amount: Math.round(totalINR * 100), // Amount in paise (smallest currency unit)
+        currency: 'INR',
+        receipt: `receipt_${Date.now()}`,
+        notes: {
+          userId: authReq.user!.id,
+          customerEmail: authReq.user!.email,
+          subtotalINR: subtotalINR.toFixed(2),
+          shippingINR: shippingINR.toFixed(2),
+          totalINR: totalINR.toFixed(2)
+        }
+      };
+
+      const order = await razorpay.orders.create(options);
+
+      res.json({
+        success: true,
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        keyId: process.env.RAZORPAY_KEY_ID,
+        // Send calculated amounts for display
+        subtotal: subtotalINR.toFixed(2),
+        shipping: shippingINR.toFixed(2),
+        total: totalINR.toFixed(2)
+      });
+    } catch (error) {
+      console.error("Error creating Razorpay order:", error);
+      res.status(500).json({ message: "Failed to create Razorpay order" });
+    }
+  });
+
+  app.post("/api/verify-razorpay-payment", requireAuth, async (req, res) => {
+    try {
+      if (!razorpay) {
+        return res.status(503).json({ message: "Razorpay is not configured" });
+      }
+
+      const authReq = req as AuthenticatedRequest;
+      const { 
+        razorpay_order_id, 
+        razorpay_payment_id, 
+        razorpay_signature,
+        shippingAddress
+      } = req.body;
+
+      // Verify signature
+      const sign = razorpay_order_id + '|' + razorpay_payment_id;
+      const expectedSign = crypto
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
+        .update(sign.toString())
+        .digest('hex');
+
+      if (razorpay_signature !== expectedSign) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid payment signature" 
+        });
+      }
+
+      // Payment verified - fetch payment details
+      const payment = await razorpay.payments.fetch(razorpay_payment_id);
+
+      if (payment.status !== 'captured' && payment.status !== 'authorized') {
+        return res.status(400).json({ message: "Payment not completed" });
+      }
+
+      // Get user's cart items server-side (never trust client)
+      const userId = authReq.user!.id;
+      const sessionId = req.headers['x-session-id'] as string;
+      const userCartItems = await storage.getCartItems(userId, sessionId);
+
+      if (userCartItems.length === 0) {
+        return res.status(400).json({ message: "Cart is empty" });
+      }
+
+      // Calculate pricing breakdown in AUD first, then convert to INR
+      const subtotalAUD = userCartItems.reduce((sum: number, item: any) => 
+        sum + (parseFloat(item.price || "0") * (item.quantity || 1)), 0
+      );
+      
+      // Convert to INR for storage
+      const subtotalINR = subtotalAUD * AUD_TO_INR_RATE;
+      const shippingINR = 250.00; // ₹250 shipping for India
+      const taxINR = 0.00;
+      const totalINR = subtotalINR + shippingINR + taxINR;
+
+      // Create order in database with INR amounts
+      const orderData = {
+        userId,
+        email: authReq.user!.email,
+        items: userCartItems.map((item: any) => ({
+          productId: item.productId,
+          variantId: item.variantId,
+          quantity: item.quantity,
+          price: (parseFloat(item.price) * AUD_TO_INR_RATE).toFixed(2), // Convert price to INR
+          title: item.title
+        })),
+        subtotal: subtotalINR.toFixed(2),
+        shipping: shippingINR.toFixed(2),
+        tax: taxINR.toFixed(2),
+        total: totalINR.toFixed(2),
+        currency: 'INR',
+        status: 'confirmed',
+        shippingAddress,
+        paymentIntentId: razorpay_payment_id,
+        paymentStatus: 'paid'
+      };
+
+      console.log('🛍️ Creating Razorpay order with data:', JSON.stringify(orderData, null, 2));
+      const order = await storage.createOrder(orderData);
+
+      // Clear cart after successful order
+      await storage.clearCart(userId, sessionId);
+
+      // Send order confirmation email
+      try {
+        const { sendOrderConfirmationEmail } = await import("./sendgrid");
+        
+        console.log(`📧 Sending order confirmation email to: ${authReq.user!.email} for order #${order.id}`);
+        
+        const formattedAddress = typeof shippingAddress === 'string' 
+          ? shippingAddress 
+          : typeof shippingAddress === 'object' && shippingAddress !== null
+            ? Object.values(shippingAddress).filter(Boolean).join('\n')
+            : 'Not provided';
+        
+        await sendOrderConfirmationEmail(authReq.user!.email, {
+          orderId: order.id,
+          customerName: `${authReq.user!.firstName || ''} ${authReq.user!.lastName || ''}`.trim() || 'Valued Customer',
+          items: userCartItems.map((item: any) => {
+            const priceINR = parseFloat(item.price || '0') * AUD_TO_INR_RATE;
+            return {
+              title: item.title || 'Product',
+              quantity: item.quantity || 1,
+              price: priceINR.toFixed(2),
+              total: (priceINR * (item.quantity || 1)).toFixed(2)
+            };
+          }),
+          subtotal: subtotalINR.toFixed(2),
+          shipping: shippingINR.toFixed(2),
+          tax: taxINR.toFixed(2),
+          total: totalINR.toFixed(2),
+          shippingAddress: formattedAddress,
+          paymentMethod: `${payment.method?.toUpperCase() || 'Razorpay'} (INR)`,
+          orderDate: new Date()
+        });
+      } catch (emailError) {
+        console.error("Failed to send order confirmation email:", emailError);
+      }
+
+      res.json({
+        success: true,
+        message: "Payment verified and order created",
+        orderId: order.id,
+        order
+      });
+    } catch (error) {
+      console.error("Error verifying Razorpay payment:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Payment verification failed" 
+      });
     }
   });
 

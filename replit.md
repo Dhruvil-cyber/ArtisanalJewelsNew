@@ -44,6 +44,17 @@ Preferred communication style: Simple, everyday language.
 - **User Roles**: Customer and admin role-based access control
 - **Security**: HTTP-only cookies, CSRF protection, and secure session configuration
 
+### Payment Integration
+- **Payment Gateways**: Dual payment gateway support for international and regional transactions
+  - **Stripe**: International credit/debit card payments (AUD currency)
+  - **Razorpay**: Indian payment methods including UPI, cards, and wallets (INR currency)
+- **Currency Conversion**: Server-side conversion from AUD to INR (1 AUD = 60 INR)
+- **Security**: HMAC signature verification for Razorpay payments, PCI compliance via payment gateway SDKs
+- **Payment Flow**: 
+  - Server-side amount calculation to prevent tampering
+  - Signature verification before order creation
+  - Automatic cart clearing and email confirmation on successful payment
+
 ### Development & Deployment
 - **Environment**: Development server with hot reloading via Vite
 - **TypeScript**: Strict type checking across frontend, backend, and shared schemas
@@ -56,6 +67,7 @@ Preferred communication style: Simple, everyday language.
 - **Database**: Neon PostgreSQL serverless database
 - **Authentication**: Replit Auth service for user management
 - **Build & Development**: Vite development server with React plugin
+- **Payment Gateways**: Stripe and Razorpay SDKs for secure payment processing
 
 ### UI & Styling
 - **Component Library**: Radix UI primitives via shadcn/ui

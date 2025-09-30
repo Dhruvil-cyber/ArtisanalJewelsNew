@@ -438,6 +438,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const { sendOrderConfirmationEmail } = await import("./sendgrid");
         
+        console.log(`📧 Sending order confirmation email to: ${authReq.user!.email} for order #${order.id}`);
+        
         // Format shipping address for email
         const formattedAddress = typeof shippingAddress === 'string' 
           ? shippingAddress 

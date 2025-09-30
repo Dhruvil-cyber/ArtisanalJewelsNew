@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { formatPrice } from "@/lib/formatters";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
@@ -15,12 +16,10 @@ import type { Product } from "@shared/schema";
 
 interface ProductCardProps {
   product: Product;
-  showActions?: boolean;
 }
 
-export default function ProductCard({ product, showActions = true }: ProductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -44,7 +43,6 @@ export default function ProductCard({ product, showActions = true }: ProductCard
         toast({
           title: "Please log in",
           description: "You need to be logged in to add items to wishlist.",
-          variant: "destructive",
         });
         return;
       }
@@ -76,7 +74,6 @@ export default function ProductCard({ product, showActions = true }: ProductCard
         toast({
           title: "Please log in",
           description: "You need to be logged in to add items to cart.",
-          variant: "destructive",
         });
         return;
       }
@@ -91,12 +88,11 @@ export default function ProductCard({ product, showActions = true }: ProductCard
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!isAuthenticated) {
       toast({
         title: "Please log in",
         description: "You need to be logged in to add items to wishlist.",
-        variant: "destructive",
       });
       return;
     }
@@ -107,7 +103,7 @@ export default function ProductCard({ product, showActions = true }: ProductCard
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (product.stock === 0) {
       toast({
         title: "Out of stock",
@@ -123,114 +119,102 @@ export default function ProductCard({ product, showActions = true }: ProductCard
   const images = Array.isArray(product.images) ? product.images : [];
   const mainImage = images.length > 0 ? images[0] : null;
 
+  // Use real review data from API
   const averageRating = (product as any).averageRating || 0;
   const reviewCount = (product as any).reviewCount || 0;
 
   return (
-    <div 
-      className="group bg-card rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden card-hover"
-      data-testid={`card-product-${product.id}`}
-    >
-      {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden bg-muted/50">
-        <Link href={`/product/${product.handle}`}>
+    <Card className="card-hover bg-card overflow-hidden shadow-md border border-border group">
+      <Link href={`/product/${product.handle}`}>
+        <div className="relative cursor-pointer">
           {mainImage ? (
             <img 
               src={mainImage.url} 
               alt={mainImage.alt || product.title}
-              className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
-              loading="lazy"
-              onLoad={() => setImageLoaded(true)}
+              className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" 
               data-testid={`img-product-${product.id}`}
             />
           ) : (
-            <div className="w-full h-full bg-muted flex items-center justify-center">
+            <div className="w-full h-64 bg-muted flex items-center justify-center">
               <span className="text-muted-foreground">No image</span>
             </div>
           )}
-        </Link>
-        
-        {!imageLoaded && mainImage && (
-          <div className="absolute inset-0 bg-muted animate-pulse" />
-        )}
 
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
+          <div className="absolute top-2 right-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleWishlistToggle}
+              disabled={addToWishlistMutation.isPending}
+              className={`w-8 h-8 bg-white/90 rounded-full flex items-center justify-center transition-colors ${
+                isWishlisted ? "text-accent" : "text-muted-foreground hover:text-accent"
+              }`}
+              data-testid={`button-wishlist-${product.id}`}
+            >
+              <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
+            </Button>
+          </div>
+
           {product.isFeatured && (
-            <Badge variant="default" data-testid={`badge-featured-${product.id}`}>
-              Featured
-            </Badge>
+            <div className="absolute bottom-2 left-2">
+              <Badge className="bg-accent text-accent-foreground" data-testid={`badge-featured-${product.id}`}>
+                Bestseller
+              </Badge>
+            </div>
           )}
-          
+
+          {/* Dynamic Inventory Badges */}
           {needsAlert && (
-            <InventoryAlert
-              alert={{
-                id: `${product.id}-${status}`,
-                productId: product.id,
-                productTitle: product.title,
-                currentStock: stock,
-                threshold: status === "critical" ? 3 : 10,
-                severity: status === "out" ? "out" : status === "critical" ? "critical" : "low",
-                lastUpdated: new Date()
-              }}
-              variant="badge"
-              showAnimation={true}
-            />
+            <div className="absolute top-2 left-2">
+              <InventoryAlert
+                alert={{
+                  id: `${product.id}-${status}`,
+                  productId: product.id,
+                  productTitle: product.title,
+                  currentStock: stock,
+                  threshold: status === "critical" ? 3 : 10,
+                  severity: status === "out" ? "out" : status === "critical" ? "critical" : "low",
+                  lastUpdated: new Date()
+                }}
+                variant="badge"
+                showAnimation={true}
+              />
+            </div>
           )}
         </div>
+      </Link>
 
-        {/* Wishlist Button */}
-        {showActions && (
-          <button
-            onClick={handleWishlistToggle}
-            disabled={addToWishlistMutation.isPending}
-            className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all"
-            data-testid={`button-wishlist-${product.id}`}
-          >
-            <Heart 
-              size={18} 
-              className={isWishlisted ? 'text-primary fill-current' : 'text-gray-600'}
-            />
-          </button>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="p-4">
+      <CardContent className="p-4">
         <Link href={`/product/${product.handle}`}>
-          <h3 className="font-semibold text-lg mb-2 line-clamp-2 hover:text-primary transition-colors" data-testid={`text-title-${product.id}`}>
-            {product.title}
-          </h3>
+          <div className="cursor-pointer">
+            <h3 className="font-medium text-foreground mb-1 line-clamp-2" data-testid={`text-title-${product.id}`}>
+              {product.title}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-2 line-clamp-1" data-testid={`text-description-${product.id}`}>
+              {product.shortDescription}
+            </p>
+          </div>
         </Link>
 
-        {product.shortDescription && (
-          <p className="text-sm text-muted-foreground mb-3 line-clamp-2" data-testid={`text-description-${product.id}`}>
-            {product.shortDescription}
-          </p>
-        )}
-
         <div className="flex items-center justify-between mb-3">
-          <div>
-            <span className="text-xl font-bold price-highlight" data-testid={`text-price-${product.id}`}>
+          <div className="flex flex-col">
+            <span className="price-highlight font-bold text-lg" data-testid={`text-price-${product.id}`}>
               {formatPrice(product.basePrice, product.currency || undefined)}
             </span>
             {needsAlert && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {stock} left
-              </p>
+              <span className="text-xs text-muted-foreground mt-1">
+                {stock} left in stock
+              </span>
             )}
           </div>
-
           {reviewCount > 0 && (
-            <div className="flex items-center gap-1">
-              <div className="flex">
+            <div className="flex items-center space-x-1">
+              <div className="flex text-yellow-400">
                 {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={14}
-                    className={i < Math.floor(averageRating) ? 'text-primary fill-current' : 'text-gray-300'}
+                  <Star 
+                    key={i} 
+                    size={12} 
+                    fill={i < Math.floor(averageRating) ? "currentColor" : "none"}
                   />
                 ))}
               </div>
@@ -240,20 +224,18 @@ export default function ProductCard({ product, showActions = true }: ProductCard
             </div>
           )}
         </div>
-        
-        {showActions && (
-          <Button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0 || addToCartMutation.isPending}
-            className="w-full"
-            size="sm"
-            data-testid={`button-add-to-cart-${product.id}`}
-          >
-            <ShoppingBag size={16} className="mr-2" />
-            {product.stock === 0 ? "Out of Stock" : addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
-          </Button>
-        )}
-      </div>
-    </div>
+
+        <Button
+          onClick={handleAddToCart}
+          disabled={product.stock === 0 || addToCartMutation.isPending}
+          className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+          size="sm"
+          data-testid={`button-add-to-cart-${product.id}`}
+        >
+          <ShoppingBag size={16} className="mr-2" />
+          {product.stock === 0 ? "Out of Stock" : addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

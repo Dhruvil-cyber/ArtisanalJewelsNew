@@ -168,6 +168,7 @@ export default function AdminProducts() {
       category: product?.category || undefined,
       tags: product?.tags || [],
       images: product?.images || [],
+      videos: product?.videos || [],
       basePrice: product?.basePrice || "0.00",
       currency: product?.currency || "USD",
       metal: product?.metal || "",
@@ -321,6 +322,96 @@ export default function AdminProducts() {
                   </Button>
                 </div>
               </label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="videos">Product Videos</Label>
+          <div className="space-y-4">
+            {/* Display existing videos */}
+            {formData.videos && formData.videos.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formData.videos.map((video: any, index: number) => (
+                  <div key={index} className="relative border rounded-lg p-4">
+                    <div className="aspect-video bg-muted rounded-lg mb-2 overflow-hidden">
+                      <video
+                        src={video.url}
+                        controls
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Input
+                        placeholder="Video title"
+                        value={video.title || ""}
+                        onChange={(e) => {
+                          const newVideos = [...(formData.videos || [])];
+                          newVideos[index] = { ...newVideos[index], title: e.target.value };
+                          setFormData(prev => ({ ...prev, videos: newVideos }));
+                        }}
+                        className="text-xs"
+                        data-testid={`input-video-title-${index}`}
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          const newVideos = formData.videos?.filter((_, i) => i !== index) || [];
+                          setFormData(prev => ({ ...prev, videos: newVideos }));
+                        }}
+                        className="w-full text-xs"
+                        data-testid={`button-remove-video-${index}`}
+                      >
+                        Remove Video
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Video URL input */}
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
+              <div className="space-y-4">
+                <div className="text-center text-muted-foreground mb-4">
+                  🎥 Add Product Videos
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    type="url"
+                    placeholder="Enter video URL (YouTube, Vimeo, or direct video link)"
+                    id="videoUrl"
+                    data-testid="input-video-url"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      const input = document.getElementById('videoUrl') as HTMLInputElement;
+                      if (input?.value) {
+                        const newVideo = {
+                          url: input.value,
+                          title: "",
+                          type: input.value.includes('youtube') || input.value.includes('youtu.be') ? 'youtube' : 
+                                input.value.includes('vimeo') ? 'vimeo' : 'direct'
+                        };
+                        setFormData(prev => ({
+                          ...prev,
+                          videos: [...(prev.videos || []), newVideo]
+                        }));
+                        input.value = '';
+                      }
+                    }}
+                    data-testid="button-add-video"
+                  >
+                    Add Video
+                  </Button>
+                </div>
+                <div className="text-xs text-muted-foreground text-center">
+                  Supports YouTube, Vimeo, or direct video file URLs
+                </div>
+              </div>
             </div>
           </div>
         </div>

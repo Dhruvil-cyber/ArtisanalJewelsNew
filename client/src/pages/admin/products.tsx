@@ -372,46 +372,53 @@ export default function AdminProducts() {
               </div>
             )}
             
-            {/* Video URL input */}
-            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
-              <div className="space-y-4">
-                <div className="text-center text-muted-foreground mb-4">
-                  🎥 Add Product Videos
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    type="url"
-                    placeholder="Enter video URL (YouTube, Vimeo, or direct video link)"
-                    id="videoUrl"
-                    data-testid="input-video-url"
-                  />
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      const input = document.getElementById('videoUrl') as HTMLInputElement;
-                      if (input?.value) {
-                        const newVideo = {
-                          url: input.value,
-                          title: "",
-                          type: input.value.includes('youtube') || input.value.includes('youtu.be') ? 'youtube' : 
-                                input.value.includes('vimeo') ? 'vimeo' : 'direct'
-                        };
-                        setFormData(prev => ({
-                          ...prev,
-                          videos: [...(prev.videos || []), newVideo]
-                        }));
-                        input.value = '';
-                      }
-                    }}
-                    data-testid="button-add-video"
-                  >
-                    Add Video
+            {/* Video file upload */}
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+              <Input
+                type="file"
+                accept="video/*"
+                multiple
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (files) {
+                    Array.from(files).forEach((file) => {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        if (event.target?.result) {
+                          const newVideo = {
+                            url: event.target.result as string,
+                            title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension for title
+                            type: 'direct'
+                          };
+                          setFormData(prev => ({
+                            ...prev,
+                            videos: [...(prev.videos || []), newVideo]
+                          }));
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    });
+                  }
+                  // Clear the input
+                  e.target.value = '';
+                }}
+                className="hidden"
+                id="videoUpload"
+                data-testid="input-video-upload"
+              />
+              <label htmlFor="videoUpload" className="cursor-pointer">
+                <div className="space-y-2">
+                  <div className="text-muted-foreground">
+                    🎥 Click to upload product videos
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Select multiple videos at once (MP4, WebM, MOV)
+                  </div>
+                  <Button type="button" variant="outline" className="mt-2">
+                    Choose Videos
                   </Button>
                 </div>
-                <div className="text-xs text-muted-foreground text-center">
-                  Supports YouTube, Vimeo, or direct video file URLs
-                </div>
-              </div>
+              </label>
             </div>
           </div>
         </div>

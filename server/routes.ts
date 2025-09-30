@@ -52,6 +52,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
 });
 
+      // Send registration confirmation email with offer banner
+      try {
+        const { sendRegistrationEmail } = await import("./sendgrid");
+        await sendRegistrationEmail(user.email, user.firstName || undefined);
+      } catch (emailError) {
+        console.error("Failed to send registration email:", emailError);
+        // Don't fail registration if email fails
+      }
+
       res.status(201).json({ 
         message: "User created successfully", 
         user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }
@@ -424,6 +433,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Clear cart after successful order
       await storage.clearCart(userId, sessionId);
+
+      // Send order confirmation email with invoice
+      try {
+        const { sendOrderConfirmationEmail } = await import("./sendgrid");
+        
+        // Format shipping address for email
+        const formattedAddress = typeof shippingAddress === 'string' 
+          ? shippingAddress 
+          : typeof shippingAddress === 'object' && shippingAddress !== null
+            ? Object.values(shippingAddress).filter(Boolean).join('\n')
+            : 'Not provided';
+        
+        await sendOrderConfirmationEmail(authReq.user!.email, {
+          orderId: order.id,
+          customerName: `${authReq.user!.firstName || ''} ${authReq.user!.lastName || ''}`.trim() || 'Valued Customer',
+          items: cartItems.map(item => ({
+            title: item.title || 'Product',
+            quantity: item.quantity || 1,
+            price: item.price || '0.00',
+            total: ((parseFloat(item.price || '0') * (item.quantity || 1))).toFixed(2)
+          })),
+          subtotal: subtotal.toFixed(2),
+          shipping: shipping.toFixed(2),
+          tax: tax.toFixed(2),
+          total: total.toFixed(2),
+          shippingAddress: formattedAddress,
+          paymentMethod: `${paymentIntent.payment_method_types?.[0]?.toUpperCase() || 'Card'} ending in ****`,
+          orderDate: new Date()
+        });
+      } catch (emailError) {
+        console.error("Failed to send order confirmation email:", emailError);
+        // Don't fail order if email fails
+      }
 
       res.json({ 
         message: "Payment confirmed and order created",

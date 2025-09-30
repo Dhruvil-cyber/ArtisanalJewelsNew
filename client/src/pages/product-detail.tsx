@@ -151,6 +151,8 @@ export default function ProductDetail() {
   }
 
   const images = Array.isArray(product.images) ? product.images : [];
+  const videos = Array.isArray(product.videos) ? product.videos : [];
+  const allMedia = [...images.map((img, idx) => ({ ...img, type: 'image', index: idx })), ...videos.map((vid, idx) => ({ ...vid, type: 'video', index: idx }))];
   const hasVariants = product.variants && product.variants.length > 0;
   const displayPrice = selectedVariant ? selectedVariant.price : product.basePrice;
 
@@ -182,35 +184,54 @@ export default function ProductDetail() {
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Product Images */}
+          {/* Product Media (Images & Videos) */}
           <div className="space-y-4">
-            {images.length > 0 ? (
+            {allMedia.length > 0 ? (
               <>
                 <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                  <img
-                    src={images[selectedImage]?.url || images[0]?.url}
-                    alt={images[selectedImage]?.alt || product.title}
-                    className="w-full h-full object-cover"
-                    data-testid="img-product-main"
-                  />
+                  {allMedia[selectedImage]?.type === 'video' ? (
+                    <video
+                      src={allMedia[selectedImage]?.url}
+                      controls
+                      className="w-full h-full object-cover"
+                      data-testid="video-product-main"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <img
+                      src={allMedia[selectedImage]?.url || images[0]?.url}
+                      alt={allMedia[selectedImage]?.alt || product.title}
+                      className="w-full h-full object-cover"
+                      data-testid="img-product-main"
+                    />
+                  )}
                 </div>
                 
-                {images.length > 1 && (
+                {allMedia.length > 1 && (
                   <div className="grid grid-cols-4 gap-2">
-                    {images.map((image, index) => (
+                    {allMedia.map((media, index) => (
                       <button
                         key={index}
                         onClick={() => setSelectedImage(index)}
                         className={`aspect-square rounded-lg overflow-hidden border-2 ${
                           selectedImage === index ? "border-accent" : "border-border"
                         }`}
-                        data-testid={`button-image-${index}`}
+                        data-testid={`button-media-${index}`}
                       >
-                        <img
-                          src={image.url}
-                          alt={image.alt || product.title}
-                          className="w-full h-full object-cover"
-                        />
+                        {media.type === 'video' ? (
+                          <video
+                            src={media.url}
+                            className="w-full h-full object-cover"
+                            muted
+                          />
+                        ) : (
+                          <img
+                            src={media.url}
+                            alt={media.alt || product.title}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -218,7 +239,7 @@ export default function ProductDetail() {
               </>
             ) : (
               <div className="aspect-square rounded-lg bg-muted flex items-center justify-center">
-                <p className="text-muted-foreground">No image available</p>
+                <p className="text-muted-foreground">No media available</p>
               </div>
             )}
           </div>

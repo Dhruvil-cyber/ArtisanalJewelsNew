@@ -111,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Handle both GET and POST logout for compatibility
   app.get('/api/logout', (req, res) => {
     res.clearCookie('authToken');
-    res.redirect('/');
+    res.redirect('/welcome');
   });
 
   app.post('/api/auth/logout', (req, res) => {

@@ -82,6 +82,7 @@ function Router() {
       {!isAuthenticated ? (
         <>
           <Route path="/" component={Welcome} />
+          <Route path="/welcome" component={Welcome} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
           <Route path="/catalog" component={Catalog} />

@@ -53,7 +53,8 @@ interface ShippingAddress {
   phone: string;
 }
 
-function CheckoutForm({ paymentMethod }: { paymentMethod: 'stripe' | 'razorpay' }) {
+// Stripe Checkout Form Component
+function StripeCheckoutForm() {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -67,7 +68,7 @@ function CheckoutForm({ paymentMethod }: { paymentMethod: 'stripe' | 'razorpay' 
     city: '',
     state: '',
     postalCode: '',
-    country: paymentMethod === 'razorpay' ? 'India' : 'Australia',
+    country: 'Australia',
     phone: ''
   });
 
@@ -101,105 +102,6 @@ function CheckoutForm({ paymentMethod }: { paymentMethod: 'stripe' | 'razorpay' 
     }
   });
 
-  // Get cart items for Razorpay
-  const { data: cartItems = [] } = useQuery<CartItemWithProduct[]>({
-    queryKey: ["/api/cart"],
-    enabled: !!user,
-  });
-
-  const handleRazorpayPayment = async () => {
-    try {
-      // Create Razorpay order (server calculates amounts with currency conversion)
-      const orderResponse = await apiRequest("POST", "/api/create-razorpay-order", {});
-      const orderData = await orderResponse.json();
-
-      if (!orderData.success) {
-        throw new Error("Failed to create Razorpay order");
-      }
-
-      // Initialize Razorpay checkout
-      const options = {
-        key: orderData.keyId,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: 'Artisanal Jewels',
-        description: 'Luxury Jewelry Purchase',
-        order_id: orderData.orderId,
-        handler: async function (response: any) {
-          try {
-            // Verify payment on backend (server fetches cart and calculates amounts)
-            const verifyResponse = await apiRequest("POST", "/api/verify-razorpay-payment", {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              shippingAddress
-            });
-
-            const verifyData = await verifyResponse.json();
-
-            if (verifyData.success) {
-              queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-              queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-              toast({
-                title: "Payment Successful!",
-                description: `Your order #${verifyData.orderId} has been confirmed.`,
-              });
-              setLocation(`/orders/${verifyData.orderId}`);
-            } else {
-              throw new Error("Payment verification failed");
-            }
-          } catch (error) {
-            toast({
-              title: "Payment Verification Failed",
-              description: error instanceof Error ? error.message : "Please contact support",
-              variant: "destructive",
-            });
-          } finally {
-            setIsProcessing(false);
-          }
-        },
-        prefill: {
-          name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : '',
-          email: user?.email || '',
-          contact: shippingAddress.phone
-        },
-        theme: {
-          color: '#A0816C'
-        },
-        modal: {
-          ondismiss: function() {
-            setIsProcessing(false);
-            toast({
-              title: "Payment Cancelled",
-              description: "You cancelled the payment process",
-              variant: "destructive",
-            });
-          }
-        }
-      };
-
-      const rzp = new window.Razorpay(options);
-      
-      rzp.on('payment.failed', function (response: any) {
-        setIsProcessing(false);
-        toast({
-          title: "Payment Failed",
-          description: response.error.description || "Payment could not be processed",
-          variant: "destructive",
-        });
-      });
-      
-      rzp.open();
-    } catch (error) {
-      setIsProcessing(false);
-      toast({
-        title: "Payment Error",
-        description: error instanceof Error ? error.message : "Failed to initiate payment",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -218,13 +120,6 @@ function CheckoutForm({ paymentMethod }: { paymentMethod: 'stripe' | 'razorpay' 
 
     setIsProcessing(true);
 
-    // Handle Razorpay payment
-    if (paymentMethod === 'razorpay') {
-      await handleRazorpayPayment();
-      return;
-    }
-
-    // Handle Stripe payment
     if (!stripe || !elements) {
       setIsProcessing(false);
       return;
@@ -343,41 +238,28 @@ function CheckoutForm({ paymentMethod }: { paymentMethod: 'stripe' | 'razorpay' 
       </Card>
 
       {/* Payment Information */}
-      {paymentMethod === 'stripe' ? (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Payment Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PaymentElement />
-            </CardContent>
-          </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5" />
+            Payment Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PaymentElement />
+        </CardContent>
+      </Card>
 
-          {/* Security Notice */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Shield className="h-4 w-4" />
-            Your payment information is securely processed by Stripe
-          </div>
-        </>
-      ) : (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Shield className="h-4 w-4" />
-          Your payment will be securely processed by Razorpay after clicking Complete Payment
-        </div>
-      )}
+      {/* Security Notice */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Shield className="h-4 w-4" />
+        Your payment information is securely processed by Stripe
+      </div>
 
       <Button 
         type="submit" 
         className="w-full bg-black hover:bg-gray-800 text-white"
-        disabled={
-          paymentMethod === 'stripe' 
-            ? (!stripe || isProcessing || confirmPaymentMutation.isPending)
-            : (isProcessing || confirmPaymentMutation.isPending)
-        }
+        disabled={!stripe || isProcessing || confirmPaymentMutation.isPending}
         data-testid="button-complete-payment"
       >
         {isProcessing || confirmPaymentMutation.isPending ? (
@@ -386,7 +268,244 @@ function CheckoutForm({ paymentMethod }: { paymentMethod: 'stripe' | 'razorpay' 
             Processing Payment...
           </>
         ) : (
-          `Complete Payment ${paymentMethod === 'razorpay' ? '(₹' + total.toFixed(2) + ')' : ''}`
+          'Complete Payment'
+        )}
+      </Button>
+    </form>
+  );
+}
+
+// Razorpay Checkout Form Component
+function RazorpayCheckoutForm() {
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
+    fullName: '',
+    address: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'India',
+    phone: ''
+  });
+
+  const handleShippingChange = (field: keyof ShippingAddress, value: string) => {
+    setShippingAddress(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleRazorpayPayment = async () => {
+    try {
+      // Create Razorpay order (server calculates amounts with currency conversion)
+      const orderResponse = await apiRequest("POST", "/api/create-razorpay-order", {});
+      const orderData = await orderResponse.json();
+
+      if (!orderData.success) {
+        throw new Error("Failed to create Razorpay order");
+      }
+
+      // Initialize Razorpay checkout
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Artisanal Jewels',
+        description: 'Luxury Jewelry Purchase',
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          try {
+            // Verify payment on backend (server fetches cart and calculates amounts)
+            const verifyResponse = await apiRequest("POST", "/api/verify-razorpay-payment", {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              shippingAddress
+            });
+
+            const verifyData = await verifyResponse.json();
+
+            if (verifyData.success) {
+              queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+              toast({
+                title: "Payment Successful!",
+                description: `Your order #${verifyData.orderId} has been confirmed.`,
+              });
+              setLocation(`/orders/${verifyData.orderId}`);
+            } else {
+              throw new Error("Payment verification failed");
+            }
+          } catch (error) {
+            toast({
+              title: "Payment Verification Failed",
+              description: error instanceof Error ? error.message : "Please contact support",
+              variant: "destructive",
+            });
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : '',
+          email: user?.email || '',
+          contact: shippingAddress.phone
+        },
+        theme: {
+          color: '#A0816C'
+        },
+        modal: {
+          ondismiss: function() {
+            setIsProcessing(false);
+            toast({
+              title: "Payment Cancelled",
+              description: "You cancelled the payment process",
+              variant: "destructive",
+            });
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      
+      rzp.on('payment.failed', function (response: any) {
+        setIsProcessing(false);
+        toast({
+          title: "Payment Failed",
+          description: response.error.description || "Payment could not be processed",
+          variant: "destructive",
+        });
+      });
+      
+      rzp.open();
+    } catch (error) {
+      setIsProcessing(false);
+      toast({
+        title: "Payment Error",
+        description: error instanceof Error ? error.message : "Failed to initiate payment",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate shipping address
+    const requiredFields = ['fullName', 'address', 'city', 'state', 'postalCode', 'phone'];
+    const missingFields = requiredFields.filter(field => !shippingAddress[field as keyof ShippingAddress]);
+    
+    if (missingFields.length > 0) {
+      toast({
+        title: "Incomplete Shipping Information",
+        description: "Please fill in all required shipping fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    await handleRazorpayPayment();
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Shipping Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Truck className="h-5 w-5" />
+            Shipping Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="fullName">Full Name *</Label>
+              <Input
+                id="fullName"
+                data-testid="input-shipping-name"
+                value={shippingAddress.fullName}
+                onChange={(e) => handleShippingChange('fullName', e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone Number *</Label>
+              <Input
+                id="phone"
+                data-testid="input-shipping-phone"
+                value={shippingAddress.phone}
+                onChange={(e) => handleShippingChange('phone', e.target.value)}
+                required
+              />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="address">Address *</Label>
+            <Input
+              id="address"
+              data-testid="input-shipping-address"
+              value={shippingAddress.address}
+              onChange={(e) => handleShippingChange('address', e.target.value)}
+              required
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="city">City *</Label>
+              <Input
+                id="city"
+                data-testid="input-shipping-city"
+                value={shippingAddress.city}
+                onChange={(e) => handleShippingChange('city', e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="state">State *</Label>
+              <Input
+                id="state"
+                data-testid="input-shipping-state"
+                value={shippingAddress.state}
+                onChange={(e) => handleShippingChange('state', e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="postalCode">Postal Code *</Label>
+              <Input
+                id="postalCode"
+                data-testid="input-shipping-postal"
+                value={shippingAddress.postalCode}
+                onChange={(e) => handleShippingChange('postalCode', e.target.value)}
+                required
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Security Notice */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Shield className="h-4 w-4" />
+        Your payment will be securely processed by Razorpay after clicking Complete Payment
+      </div>
+
+      <Button 
+        type="submit" 
+        className="w-full bg-black hover:bg-gray-800 text-white"
+        disabled={isProcessing}
+        data-testid="button-complete-payment"
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Processing Payment...
+          </>
+        ) : (
+          'Complete Payment'
         )}
       </Button>
     </form>
@@ -416,7 +535,7 @@ export default function CheckoutPage() {
   }, 0);
   
   const subtotal = paymentMethod === 'razorpay' ? subtotalAUD * AUD_TO_INR_RATE : subtotalAUD;
-  const shipping = paymentMethod === 'razorpay' ? 250.00 : 25.00; // ₹250 for India (Razorpay), $25 for Australia (Stripe)
+  const shipping = paymentMethod === 'razorpay' ? (25.00 * AUD_TO_INR_RATE) : 25.00; // ₹1500 for India (Razorpay), $25 for Australia (Stripe)
   const total = subtotal + shipping;
 
   useEffect(() => {
@@ -535,10 +654,10 @@ export default function CheckoutPage() {
 
             {paymentMethod === 'stripe' ? (
               <Elements stripe={stripePromise} options={stripeOptions}>
-                <CheckoutForm paymentMethod="stripe" />
+                <StripeCheckoutForm />
               </Elements>
             ) : (
-              <CheckoutForm paymentMethod="razorpay" />
+              <RazorpayCheckoutForm />
             )}
           </div>
 

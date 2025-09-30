@@ -122,6 +122,7 @@ export const orders = pgTable("orders", {
   currency: varchar("currency", { length: 3 }).default("USD"),
   paymentStatus: varchar("payment_status").default("pending"),
   paymentMethod: varchar("payment_method"),
+  paymentIntentId: varchar("payment_intent_id"), // Stripe payment intent ID or Razorpay payment ID (checked for idempotency at app level)
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

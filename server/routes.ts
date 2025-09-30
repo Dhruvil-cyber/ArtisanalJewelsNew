@@ -523,7 +523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Convert to INR
       const subtotalINR = subtotalAUD * AUD_TO_INR_RATE;
-      const shippingINR = 250.00; // Fixed shipping for India (roughly 25 AUD * 10, rounded for simplicity)
+      const shippingINR = shippingAUD * AUD_TO_INR_RATE; // Convert shipping to INR (25 AUD * 60 = 1500 INR)
       const totalINR = subtotalINR + shippingINR;
 
       // Create Razorpay order
@@ -573,7 +573,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shippingAddress
       } = req.body;
 
-      // Verify signature
+      // Idempotency check: prevent duplicate orders for the same payment
+      const existingOrder = await storage.getOrderByPaymentIntent(razorpay_payment_id);
+      if (existingOrder) {
+        return res.json({
+          success: true,
+          message: "Order already exists for this payment",
+          orderId: existingOrder.id,
+          order: existingOrder
+        });
+      }
+
+      // Verify HMAC signature
       const sign = razorpay_order_id + '|' + razorpay_payment_id;
       const expectedSign = crypto
         .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
@@ -587,11 +598,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Payment verified - fetch payment details
+      // Fetch Razorpay order to verify ownership and amounts
+      const razorpayOrder = await razorpay.orders.fetch(razorpay_order_id);
+      
+      // Verify order belongs to authenticated user
+      if (razorpayOrder.notes?.userId !== authReq.user!.id) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Order does not belong to authenticated user" 
+        });
+      }
+
+      // Verify order currency is INR
+      if (razorpayOrder.currency !== 'INR') {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid currency - expected INR" 
+        });
+      }
+
+      // Fetch payment details and verify status
       const payment = await razorpay.payments.fetch(razorpay_payment_id);
 
-      if (payment.status !== 'captured' && payment.status !== 'authorized') {
-        return res.status(400).json({ message: "Payment not completed" });
+      // Only accept captured payments (not authorized)
+      if (payment.status !== 'captured') {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Payment not captured - status: ${payment.status}` 
+        });
+      }
+
+      // Verify payment.order_id matches the razorpay_order_id
+      if (payment.order_id !== razorpay_order_id) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Payment order_id mismatch" 
+        });
+      }
+
+      // Verify payment currency matches (defense-in-depth)
+      if (payment.currency !== 'INR') {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Payment currency mismatch - expected INR" 
+        });
       }
 
       // Get user's cart items server-side (never trust client)
@@ -600,19 +650,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userCartItems = await storage.getCartItems(userId, sessionId);
 
       if (userCartItems.length === 0) {
-        return res.status(400).json({ message: "Cart is empty" });
+        return res.status(400).json({ 
+          success: false, 
+          message: "Cart is empty" 
+        });
       }
 
       // Calculate pricing breakdown in AUD first, then convert to INR
       const subtotalAUD = userCartItems.reduce((sum: number, item: any) => 
         sum + (parseFloat(item.price || "0") * (item.quantity || 1)), 0
       );
+      const shippingAUD = 25.00;
+      const totalAUD = subtotalAUD + shippingAUD;
       
-      // Convert to INR for storage
+      // Convert to INR (must match create-razorpay-order calculation)
       const subtotalINR = subtotalAUD * AUD_TO_INR_RATE;
-      const shippingINR = 250.00; // ₹250 shipping for India
+      const shippingINR = shippingAUD * AUD_TO_INR_RATE; // 25 AUD * 60 = 1500 INR
       const taxINR = 0.00;
       const totalINR = subtotalINR + shippingINR + taxINR;
+      const expectedAmountInPaise = Math.round(totalINR * 100);
+
+      // Verify payment amount matches server-calculated total
+      if (payment.amount !== expectedAmountInPaise) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Payment amount mismatch - expected ${expectedAmountInPaise} paise, got ${payment.amount} paise` 
+        });
+      }
+
+      // Verify order amount matches (double check)
+      if (razorpayOrder.amount !== expectedAmountInPaise) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Order amount mismatch - expected ${expectedAmountInPaise} paise, got ${razorpayOrder.amount} paise` 
+        });
+      }
 
       // Create order in database with INR amounts
       const orderData = {

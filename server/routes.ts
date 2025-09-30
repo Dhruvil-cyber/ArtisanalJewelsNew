@@ -1097,7 +1097,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send emails to all subscribers
       let sentCount = 0;
       let failedCount = 0;
-      let lastError = null;
+      let lastError: any = null;
 
       for (const subscriber of subscribers) {
         try {

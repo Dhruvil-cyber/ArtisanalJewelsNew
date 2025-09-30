@@ -100,6 +100,37 @@ export default function About() {
           </div>
         </section>
 
+        {/* Our Craftsmanship Video */}
+        <section className="py-20 bg-background border-t">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto text-center mb-12">
+              <h2 className="font-serif font-bold text-3xl sm:text-4xl text-foreground mb-6">
+                Experience Our <span className="text-accent">Craftsmanship</span>
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Watch how our master artisans transform precious materials into timeless pieces of wearable art, combining traditional techniques with modern innovation.
+              </p>
+            </div>
+            
+            <div className="max-w-5xl mx-auto">
+              <div className="aspect-video rounded-lg overflow-hidden shadow-2xl bg-muted">
+                <video
+                  className="w-full h-full object-cover"
+                  controls
+                  poster="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080"
+                  data-testid="video-about-craftsmanship"
+                >
+                  <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <p className="text-center text-sm text-muted-foreground mt-4">
+                * This is a sample video. Replace with your actual craftsmanship video URL.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Our Values */}
         <section className="py-20 bg-muted">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">

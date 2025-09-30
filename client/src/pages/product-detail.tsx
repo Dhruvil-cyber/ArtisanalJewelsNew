@@ -190,14 +190,71 @@ export default function ProductDetail() {
               <>
                 <div className="aspect-square rounded-lg overflow-hidden bg-muted">
                   {allMedia[selectedImage]?.type === 'video' ? (
-                    <video
-                      src={allMedia[selectedImage]?.url}
-                      controls
-                      className="w-full h-full object-cover"
-                      data-testid="video-product-main"
-                    >
-                      Your browser does not support the video tag.
-                    </video>
+                    (() => {
+                      const videoUrl = allMedia[selectedImage]?.url || '';
+                      const videoType = allMedia[selectedImage]?.type;
+                      
+                      // YouTube embed
+                      if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+                        const videoId = videoUrl.includes('youtu.be') 
+                          ? videoUrl.split('youtu.be/')[1]?.split('?')[0]
+                          : new URL(videoUrl).searchParams.get('v');
+                        return (
+                          <iframe
+                            src={`https://www.youtube.com/embed/${videoId}`}
+                            className="w-full h-full"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            data-testid="iframe-youtube-main"
+                          />
+                        );
+                      }
+                      
+                      // Vimeo embed
+                      if (videoUrl.includes('vimeo.com')) {
+                        const videoId = videoUrl.split('vimeo.com/')[1]?.split('?')[0];
+                        return (
+                          <iframe
+                            src={`https://player.vimeo.com/video/${videoId}`}
+                            className="w-full h-full"
+                            allow="autoplay; fullscreen; picture-in-picture"
+                            allowFullScreen
+                            data-testid="iframe-vimeo-main"
+                          />
+                        );
+                      }
+                      
+                      // Instagram embed
+                      if (videoUrl.includes('instagram.com')) {
+                        return (
+                          <div className="w-full h-full flex items-center justify-center bg-black/90 p-4">
+                            <div className="text-center space-y-4">
+                              <p className="text-white">Instagram videos cannot be embedded directly</p>
+                              <a 
+                                href={videoUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-block px-6 py-2 bg-primary text-black rounded-lg hover:bg-primary/90 transition-colors"
+                              >
+                                View on Instagram
+                              </a>
+                            </div>
+                          </div>
+                        );
+                      }
+                      
+                      // Direct video file
+                      return (
+                        <video
+                          src={videoUrl}
+                          controls
+                          className="w-full h-full object-cover"
+                          data-testid="video-product-main"
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      );
+                    })()
                   ) : (
                     <img
                       src={allMedia[selectedImage]?.url || images[0]?.url}
@@ -214,17 +271,28 @@ export default function ProductDetail() {
                       <button
                         key={index}
                         onClick={() => setSelectedImage(index)}
-                        className={`aspect-square rounded-lg overflow-hidden border-2 ${
+                        className={`relative aspect-square rounded-lg overflow-hidden border-2 ${
                           selectedImage === index ? "border-accent" : "border-border"
                         }`}
                         data-testid={`button-media-${index}`}
                       >
                         {media.type === 'video' ? (
-                          <video
-                            src={media.url}
-                            className="w-full h-full object-cover"
-                            muted
-                          />
+                          <div className="relative w-full h-full bg-black/80 flex items-center justify-center">
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                                <div className="w-0 h-0 border-l-8 border-l-white border-y-6 border-y-transparent ml-1"></div>
+                              </div>
+                            </div>
+                            {media.url.includes('youtube') || media.url.includes('youtu.be') ? (
+                              <span className="text-white text-xs font-semibold">YouTube</span>
+                            ) : media.url.includes('vimeo') ? (
+                              <span className="text-white text-xs font-semibold">Vimeo</span>
+                            ) : media.url.includes('instagram') ? (
+                              <span className="text-white text-xs font-semibold">Instagram</span>
+                            ) : (
+                              <span className="text-white text-xs font-semibold">Video</span>
+                            )}
+                          </div>
                         ) : (
                           <img
                             src={media.url}

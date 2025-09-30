@@ -39,10 +39,10 @@ export default function Landing() {
 
       <main>
         {/* Hero Section */}
-        <section className="relative h-[90vh] min-h-[500px] sm:h-[80vh] sm:min-h-[600px] luxury-gradient overflow-hidden">
+        <section className="relative min-h-[600px] h-[85vh] sm:h-[80vh] md:h-[85vh] lg:h-[90vh] luxury-gradient overflow-hidden">
           <div className="hero-pattern absolute inset-0"></div>
           <div 
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
               backgroundImage: banners.length > 0 && banners[0].images && Array.isArray(banners[0].images) && banners[0].images.length > 0
                 ? `url('${banners[0].images[0].url}')`
@@ -52,7 +52,7 @@ export default function Landing() {
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent"></div>
           </div>
           
-          <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+          <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center py-20 sm:py-24">
             <div className="max-w-2xl w-full">
               <div className="mb-3 sm:mb-4">
                 <span className="inline-block px-3 py-1.5 sm:px-4 sm:py-2 bg-primary/20 border border-primary rounded-full text-primary font-semibold text-xs sm:text-sm tracking-wide">
@@ -65,13 +65,13 @@ export default function Landing() {
                   : <>Artisanal <span className="gold-accent">Luxury</span> Jewelry</>
                 }
               </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-gray-200 mb-6 sm:mb-8 leading-relaxed">
+              <p className="text-base sm:text-lg lg:text-xl text-gray-200 mb-6 sm:mb-8 leading-relaxed max-w-xl">
                 {banners.length > 0 && banners[0].description
                   ? banners[0].description
                   : "Discover our collection of timeless pieces, each meticulously crafted by master artisans using the finest materials and techniques passed down through generations in the heart of Melbourne."
                 }
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-0">
                 {isAuthenticated ? (
                   <>
                     <Link href="/catalog" className="w-full sm:w-auto">

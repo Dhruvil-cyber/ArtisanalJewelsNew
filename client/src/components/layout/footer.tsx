@@ -123,7 +123,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/shipping">
+                <Link href="/shipping-returns">
                   <span className="text-gray-300 hover:text-accent transition-colors cursor-pointer" data-testid="link-footer-shipping">
                     Shipping & Returns
                   </span>
@@ -186,7 +186,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/sustainability">
+                <Link href="/ethics-sustainability">
                   <span className="text-gray-300 hover:text-accent transition-colors cursor-pointer" data-testid="link-footer-sustainability">
                     Ethics & Sustainability
                   </span>
@@ -203,17 +203,17 @@ export default function Footer() {
               © 2024 Artisanal Jewels. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="/privacy">
+              <Link href="/privacy-policy">
                 <span className="text-gray-400 hover:text-accent text-sm transition-colors cursor-pointer" data-testid="link-footer-privacy">
                   Privacy Policy
                 </span>
               </Link>
-              <Link href="/terms">
+              <Link href="/terms-of-service">
                 <span className="text-gray-400 hover:text-accent text-sm transition-colors cursor-pointer" data-testid="link-footer-terms">
                   Terms of Service
                 </span>
               </Link>
-              <Link href="/cookies">
+              <Link href="/cookie-policy">
                 <span className="text-gray-400 hover:text-accent text-sm transition-colors cursor-pointer" data-testid="link-footer-cookies">
                   Cookie Policy
                 </span>

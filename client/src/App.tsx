@@ -46,6 +46,9 @@ import Craftsmanship from "@/pages/craftsmanship";
 import Press from "@/pages/press";
 import Careers from "@/pages/careers";
 import EthicsSustainability from "@/pages/ethics-sustainability";
+import PrivacyPolicy from "@/pages/privacy-policy";
+import TermsOfService from "@/pages/terms-of-service";
+import CookiePolicy from "@/pages/cookie-policy";
 
 // Remove SimpleLanding - now using dedicated Welcome page
 
@@ -105,6 +108,9 @@ function Router() {
           <Route path="/press" component={Press} />
           <Route path="/careers" component={Careers} />
           <Route path="/ethics-sustainability" component={EthicsSustainability} />
+          <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/terms-of-service" component={TermsOfService} />
+          <Route path="/cookie-policy" component={CookiePolicy} />
         </>
       ) : (
         <>
@@ -147,6 +153,9 @@ function Router() {
           <Route path="/press" component={Press} />
           <Route path="/careers" component={Careers} />
           <Route path="/ethics-sustainability" component={EthicsSustainability} />
+          <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/terms-of-service" component={TermsOfService} />
+          <Route path="/cookie-policy" component={CookiePolicy} />
         </>
       )}
       <Route component={NotFound} />

@@ -1,16 +1,23 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import MobileMenu from "@/components/layout/mobile-menu";
 import { Separator } from "@/components/ui/separator";
 
 export default function CookiePolicy() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <Header onMobileMenuToggle={() => setIsMobileMenuOpen(true)} />
+      <MobileMenu 
+        isOpen={isMobileMenuOpen} 
+        onClose={() => setIsMobileMenuOpen(false)} 
+      />
       <main className="flex-1 container mx-auto px-4 py-12 max-w-4xl">
         <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-4" data-testid="heading-cookie-policy">
           Cookie Policy

@@ -181,8 +181,8 @@ export default function PrivacyPolicy() {
             <div className="bg-muted/30 p-6 rounded-lg">
               <p className="text-foreground mb-2"><strong>Artisanal Jewels</strong></p>
               <p className="text-foreground">Email: privacy@artisanaljewels.com</p>
-              <p className="text-foreground">Phone: +61 2 9876 5432 (Australia)</p>
-              <p className="text-foreground">Phone: +91 22 1234 5678 (India)</p>
+              <p className="text-foreground">Phone: +61 451565356 (Australia)</p>
+              <p className="text-foreground">Phone: +91 9879005386 (India)</p>
             </div>
           </section>
         </div>

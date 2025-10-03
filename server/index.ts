@@ -26,10 +26,14 @@ app.use((req, res, next) => {
   if (nodeEnv === 'development') {
     res.setHeader('Access-Control-Allow-Origin', origin || '*');
   } 
-  // In production, allow Vercel and Netlify domains for this project
+  // In production, allow Vercel/Netlify domains and custom domains
   else if (origin && (
-    origin.includes('artisanal-jewels') && origin.includes('vercel.app') ||
-    origin.includes('netlify.app')
+    (origin.includes('artisanal-jewels') && origin.includes('vercel.app')) ||
+    origin.includes('netlify.app') ||
+    origin === 'https://www.artisanaljewels.com' ||
+    origin === 'https://artisanaljewels.com' ||
+    origin === 'https://www.artisanaljewels.shop' ||
+    origin === 'https://artisanaljewels.shop'
   )) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }

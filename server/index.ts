@@ -3,8 +3,22 @@ import { registerRoutes } from "./routes";
 
 const app = express();
 
+// ---- STRICT CORS (works for prod + dev) ----
+const ALLOWED_ORIGINS = new Set<string>([
+  // Your production domains
+  "https://www.artisanaljewels.com",
+  "https://artisanaljewels.com",
+  "https://www.artisanaljewels.shop",
+  "https://artisanaljewels.shop",
+  // Preview / fallback domains (add your actual preview domains)
+  "https://artisanal-jewels1.vercel.app",
+  "https://artisanal-jewels.vercel.app",
+]);
+
+const isDev = (process.env.NODE_ENV || "development") !== "production";
+
 // Trust proxy for secure cookies behind Render's proxy
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 
 // Simple logging function
 function log(message: string, source = "express") {
@@ -17,37 +31,40 @@ function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
-// Manual CORS implementation to avoid cors package dependency issues
-app.use((req, res, next) => {
+// CORS middleware - MUST be before all other middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
   const origin = req.headers.origin;
-  const nodeEnv = process.env.NODE_ENV || 'development';
-  
-  // Allow all origins in development
-  if (nodeEnv === 'development') {
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
-  } 
-  // In production, allow Vercel/Netlify domains and custom domains
-  else if (origin && (
-    (origin.includes('artisanal-jewels') && origin.includes('vercel.app')) ||
-    origin.includes('netlify.app') ||
-    origin === 'https://www.artisanaljewels.com' ||
-    origin === 'https://artisanaljewels.com' ||
-    origin === 'https://www.artisanaljewels.shop' ||
-    origin === 'https://artisanaljewels.shop'
-  )) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+
+  // Always vary on Origin so caches don't mix responses
+  res.setHeader("Vary", "Origin");
+
+  if (isDev) {
+    // In dev be permissive (but still return credentials correctly)
+    if (origin) res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    if (origin && ALLOWED_ORIGINS.has(origin)) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+    }
   }
-  
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,x-session-id');
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(204).send();
+
+  // If you use cookies/session, you need credentials = true
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  // Include ALL headers your frontend might send
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, x-session-id"
+  );
+
+  // Allowed methods
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+
+  // Respond to preflight right here - use 200 (some CDNs/proxies strip headers from 204)
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
     return;
   }
-  
+
   next();
 });
 

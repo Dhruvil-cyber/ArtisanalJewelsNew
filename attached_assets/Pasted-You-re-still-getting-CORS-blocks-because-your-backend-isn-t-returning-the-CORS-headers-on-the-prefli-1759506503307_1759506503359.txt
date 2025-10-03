@@ -1,0 +1,128 @@
+You’re still getting CORS blocks because your backend isn’t returning the CORS headers on the preflight (OPTIONS) requests coming from https://www.artisanaljewels.com. Let’s harden your CORS middleware so it always sets the headers (including on errors) and explicitly whitelists your domains.
+
+Drop this in your index.ts above everything else (top of file, before express.json() and routes). It replaces your current CORS block.
+
+import express, { Request, Response, NextFunction } from "express";
+
+const app = express();
+
+// ---- STRICT CORS (works for prod + dev) ----
+const ALLOWED_ORIGINS = new Set<string>([
+  // Your production domains
+  "https://www.artisanaljewels.com",
+  "https://artisanaljewels.com",
+  // Preview / fallbacks (add your actual preview domains if you use them)
+  "https://artisanal-jewels1.vercel.app",
+  "https://artisanal-jewels.vercel.app",
+]);
+
+const isDev = (process.env.NODE_ENV || "development") !== "production";
+
+app.set("trust proxy", 1);
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const origin = req.headers.origin;
+
+  // Always vary on Origin so caches don’t mix responses
+  res.setHeader("Vary", "Origin");
+
+  if (isDev) {
+    // In dev be permissive (but still return credentials correctly)
+    if (origin) res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    if (origin && ALLOWED_ORIGINS.has(origin)) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+    }
+  }
+
+  // If you use cookies/session, you need credentials = true
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  // NOTE: include ALL headers your frontend might send
+  // Add more if your requests include them (e.g., "x-session-id", "x-csrf-token")
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, x-session-id"
+  );
+
+  // Allowed methods
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+
+  // Respond to preflight right here
+  if (req.method === "OPTIONS") {
+    // Some CDNs/proxies strip headers from 204, so use 200
+    res.status(200).end();
+    return;
+  }
+
+  next();
+});
+
+Why this fixes it
+
+Always sets headers before any routes (including errors and 404s).
+
+Explicit whitelist for https://www.artisanaljewels.com and the apex.
+
+Returns 200 for OPTIONS (some intermediaries drop headers on 204).
+
+Sends Access-Control-Allow-Credentials: true so cookies work when you call fetch(..., { credentials: "include" }).
+
+Includes Vary: Origin so caches don’t serve the wrong headers.
+
+Double-check these 5 things
+
+Frontend uses your API base URL env
+
+In Vercel → Project → Settings → Environment Variables add:
+
+NEXT_PUBLIC_API_URL = https://artisanaljewels.onrender.com
+
+
+Ensure your client code builds requests like:
+
+const API = import.meta.env.VITE_API_URL || process.env.NEXT_PUBLIC_API_URL;
+fetch(`${API}/api/auth/user`, { credentials: "include" });
+
+
+No trailing slashes
+Use exactly https://www.artisanaljewels.com and https://artisanaljewels.com in the allowlist (no / at the end).
+
+Cookies set correctly (if you use sessions)
+
+When you set cookies on your backend, use:
+
+res.cookie("sid", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none", // Required for cross-site cookies
+  domain: ".artisanaljewels.com", // only if cookie must be read on your apex; otherwise omit
+  // path: "/",
+});
+
+
+sameSite: "none" and secure: true are required for cross-origin cookies.
+
+Render is live on HTTPS
+
+Use the HTTPS URL in the frontend: https://artisanaljewels.onrender.com
+
+If Render returns a redirect, preflights will fail. Hitting the correct HTTPS origin avoids redirects.
+
+Redeploy both sides
+
+After changing index.ts on Render, deploy and watch logs for OPTIONS /api/... 200.
+
+After setting NEXT_PUBLIC_API_URL on Vercel, rebuild the frontend so it bakes in the new env.
+
+If you still see “No ‘Access-Control-Allow-Origin’…”
+
+Open your Render logs while loading the site and verify you see OPTIONS requests from your domain:
+
+OPTIONS /api/auth/user 200
+GET /api/auth/user 200
+
+
+If you don’t see OPTIONS, your request isn’t reaching Render (wrong URL, DNS, or a service crash). If you do see them but status is not 200, your CORS block isn’t the first middleware—move it higher.
+
+If you want, paste your small fetch helper and I’ll convert it to auto-use NEXT_PUBLIC_API_URL/VITE_API_URL, always send credentials: "include", and surface better error messages for CORS/redirects.

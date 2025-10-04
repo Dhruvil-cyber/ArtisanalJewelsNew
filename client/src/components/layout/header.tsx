@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
 import { Search, User, Heart, ShoppingBag, Menu, ChevronDown } from "lucide-react";
-import logoImage from "@assets/artisanal-jewels-logo.png";
+import logoImage from "@/assets/artisanal-jewels-logo.png";
 import type { CartItem } from "@shared/schema";
 
 interface HeaderProps {

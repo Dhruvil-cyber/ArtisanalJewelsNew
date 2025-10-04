@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Facebook, Instagram, Youtube } from "lucide-react";
-import logoImage from "@assets/artisanal-jewels-logo.png";
+import logoImage from "@/assets/artisanal-jewels-logo.png";
 
 export default function Footer() {
   return (
